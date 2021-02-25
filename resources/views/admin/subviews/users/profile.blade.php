@@ -36,6 +36,7 @@
                         <div class="media-body">
                                     <h3 class="card-profile-name">{{$item_data->username}}</h3>
                                 </div><!-- media-body -->
+
                         <?php
                             echo generate_multi_accepters(
                                 $accepturl              = "",
@@ -52,6 +53,93 @@
                         ?>
 
                     </div><!-- card -->
+
+
+
+                    <div class="card card-profile">
+
+                        <div class="slim-mainpanel">
+                            <div class="container">
+                                <div class="slim-pageheader">
+
+                                    <h6 class="slim-pagetitle"> الحجوزات</h6>
+                                </div><!-- slim-pageheader -->
+
+                                <div class="section-wrapper">
+                                    <p class="mg-b-20 mg-sm-b-40"></p>
+
+                                    <div class="table-wrapper">
+
+                                        <?php if(is_array($results->all()) && count($results->all())): ?>
+
+                                        <table id="datatable2" class="table display responsive nowrap">
+                                            <thead>
+                                            <tr>
+                                                <th class="wd-15p"><span>#</span></th>
+                                                <th class="wd-15p"><span>التاريخ</span></th>
+                                                <th class="wd-15p"><span>من</span></th>
+                                                <th class="wd-15p"><span>الى</span></th>
+                                                <th class="wd-15p"><span>حالة الدفع</span></th>
+                                                <th class="wd-15p"><span> العملية</span></th>
+
+
+                                            </tr>
+                                            </thead>
+                                            <tbody id="sortable">
+                                            <?php foreach ($results as $key => $item): ?>
+                                            <td>
+                                                {{$key+1}}
+                                            </td>
+                                            <td>
+                                                {{$item->session_date}}
+                                            </td>
+                                            <td>
+                                                {{$item->time_from}}
+                                            </td>
+                                            <td>
+                                                {{$item->time_to}}
+                                            </td>
+
+                                            <td>
+                                                @if($item->is_paid == 0)
+                                                    <span>لم يتم الدفع</span>
+                                                @else
+                                                    <span>تم الدفع</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($item->is_done == 0)
+                                                <a class="btn btn-primary mg-b-6" href="{{url("admin/users/bookings/$item->doctor_id/sessions/$item->session_id")}}">
+                                                    تغيير الميعاد
+                                                </a>
+                                                @else
+                                                    <span>انتهت</span>
+                                                 @endif
+
+                                            </td>
+                                            </tr>
+                                            <?php endforeach ?>
+                                            </tbody>
+                                        </table>
+
+
+                                        <?php else : ?>
+
+                                        @include('admin.components.no_results_found')
+
+                                        <?php endif; ?>
+
+                                    </div><!-- table-wrapper -->
+                                </div><!-- section-wrapper -->
+
+                            </div><!-- container -->
+                        </div><!-- slim-mainpanel -->
+
+
+                    </div><!-- card -->
+
+
+
                 </div><!-- col-8 -->
 
                 <div class="col-lg-4 mg-t-20 mg-lg-t-0">

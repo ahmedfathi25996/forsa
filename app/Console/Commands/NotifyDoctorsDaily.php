@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\models\doctors\doctors_m;
 use App\models\doctors\doctors_sessions_m;
 use App\models\notification_m;
+use App\Notifications\mail\SessionReminder;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class NotifyDoctorsDaily extends Command
      *
      * @var string
      */
-    protected $signature = 'doctors:notifyDaily';
+    protected $signature = 'users:notifyDoctorsDaily';
 
     /**
      * The console command description.
@@ -42,26 +43,29 @@ class NotifyDoctorsDaily extends Command
      */
     public function handle()
     {
+        date_default_timezone_set("Africa/Cairo");
+
         $now = date('Y-m-d');
-        $users = doctors_sessions_m::select(DB::raw("
-            doctors_sessions.*,
+        $users = User::select(DB::raw("
+            doctors_sessions.session_date,
+            doctors_sessions.time_from,
             users.user_id
 
+        "))-> join("doctors", function ($join){
+            $join->on("doctors.user_id","=","users.user_id")
+                ->whereNull("doctors.deleted_at");
 
-        "))
-            ->join("doctors", function ($join){
-                $join->on("doctors.doctor_id","=","doctors_sessions.doctor_id")
-                    ->whereNull("doctors.deleted_at");
+        })->join("doctors_sessions", function ($join) use($now){
+            $join->on("doctors_sessions.doctor_id","=","doctors.doctor_id")
+                ->where("doctors_sessions.is_done",0)
+                ->where("doctors_sessions.is_booked",1)->
 
-            })->join("users", function ($join){
-                $join->on("users.user_id","=","doctors.user_id")
-                    ->whereNull("users.deleted_at");
+                where("doctors_sessions.session_date",">=",$now)
+                ->whereNull("doctors_sessions.deleted_at");
 
-            })->
-            where("doctors_sessions.is_booked",1)->
-            where("doctors_sessions.is_done",0)->
-            where("doctors_sessions.session_date",">=",$now)->
-            get();
+        })
+            ->get();
+
         foreach($users as $user) {
             $date = $user->session_date;
             $time = $user->time_from;
@@ -71,6 +75,8 @@ class NotifyDoctorsDaily extends Command
                 "not_type" => "session_reminder",
                 "not_title" => "You have session at ".$time." ".$date
             ]);
+            $user->notify((new SessionReminder($user,$time,$date)));
+
         }
     }
 }

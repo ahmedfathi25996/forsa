@@ -67,7 +67,7 @@ class CategoryController extends adminBaseController
         if ($cat_id != null)
         {
 
-            $cat_id    = intval(clean($cat_id));
+            $cat_id    = intval($cat_id);
 
             $parent_id = $request->get('parent_id',0);
             $this->data["buffet_parent_id"] = $parent_id;
@@ -120,7 +120,7 @@ class CategoryController extends adminBaseController
                 // update
                 if ($cat_id != null) {
 
-                    $check = category_m::find($cat_id)->update(clean($input_data));
+                    $check = category_m::find($cat_id)->update($input_data);
 
 
                     if ($check == true) {
@@ -137,7 +137,7 @@ class CategoryController extends adminBaseController
                 } else {
 
                     // insert
-                    $check = category_m::create(clean($input_data));
+                    $check = category_m::create($input_data);
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -160,8 +160,8 @@ class CategoryController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["cat_id"]            = $return_id;
-                    $inputs["cat_name"]          = clean(array_shift($input_data["cat_name"]));
-                    $inputs["cat_short_desc"]    = clean(array_shift($input_data["cat_short_desc"]));
+                    $inputs["cat_name"]          = array_shift($input_data["cat_name"]);
+                    $inputs["cat_short_desc"]    = array_shift($input_data["cat_short_desc"]);
 
 
 
@@ -222,13 +222,13 @@ class CategoryController extends adminBaseController
         $rules_itself           = [];
         $attrs_names            = [];
 
-        $cat_name    = clean($request["cat_name"]);
+        $cat_name    = $request["cat_name"];
 
 
         foreach($all_langs as $key => $lang_item)
         {
 
-            $current_name = clean(array_shift($cat_name));
+            $current_name = array_shift($cat_name);
             if (in_array($current_name, $cat_name) && !empty($current_name))
             {
                 $this->data["success"] = "<div class = 'alert alert-danger'>لا يمكن تكرار اسم القسم</div>";
@@ -249,7 +249,7 @@ class CategoryController extends adminBaseController
                 $translate_row_id   = $current_row->first()->id;
             }
 
-            $rules_values["cat_name$key"]              = clean($request->get("cat_name")[$key]);
+            $rules_values["cat_name$key"]              = $request->get("cat_name")[$key];
             $rules_itself["cat_name$key"]              = "required|unique:category_translate,cat_name,".$translate_row_id.",id,deleted_at,NULL";
             $attrs_names["cat_name$key.required"]      = "الإسم في ".$lang_item->lang_text." مطلوب إدخالة ";
             $attrs_names["cat_name$key.unique"]        = "الإسم في ".$lang_item->lang_text." مسجل مسبقا ";
@@ -264,7 +264,7 @@ class CategoryController extends adminBaseController
 
 
     public function delete_cat(Request $request){
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval($request->get("item_id",0));
 
 
         #region remove translation

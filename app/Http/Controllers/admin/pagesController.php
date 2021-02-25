@@ -51,7 +51,7 @@ class pagesController extends adminBaseController
         if ($page_id != null)
         {
 
-            $page_id    = intval(clean($page_id));
+            $page_id    = intval($page_id);
 
             $cond       = [];
             $cond[]     = ["pages.page_id","=",$page_id];
@@ -92,7 +92,7 @@ class pagesController extends adminBaseController
                 // update
                 if ($page_id != null) {
 
-                    $check = pages_m::find($page_id)->update(clean($request->all()));
+                    $check = pages_m::find($page_id)->update($request->all());
 
                     if ($check == true) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -107,7 +107,7 @@ class pagesController extends adminBaseController
                 } else {
 
                     // insert
-                    $check = pages_m::create(clean($request->all()));
+                    $check = pages_m::create($request->all());
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -129,7 +129,7 @@ class pagesController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["page_id"]       = $page_id;
-                    $inputs["page_title"]    = clean(array_shift($input_data["page_title"]));
+                    $inputs["page_title"]    = array_shift($input_data["page_title"]);
                     $inputs["page_body"]     = array_shift($input_data["page_body"]);
                     $inputs["page_slug"]     = trim(string_safe(array_shift($input_data["page_slug"])));
 
@@ -189,9 +189,9 @@ class pagesController extends adminBaseController
         $rules_itself           = [];
         $attrs_names            = [];
 
-        $page_title             = clean($request->get("page_title"));
+        $page_title             = $request->get("page_title");
         $page_body              = $request->get("page_body");
-        $page_slug              = clean($request->get("page_slug"));
+        $page_slug              = $request->get("page_slug");
         $small_img_id           = $request['small_img_file'];
 
 
@@ -232,7 +232,7 @@ class pagesController extends adminBaseController
                 $translate_row_id   = $current_row->first()->id;
             }
 
-            $rules_values["page_title_$key"]              = clean($request->get("page_title")[$key]);
+            $rules_values["page_title_$key"]              = $request->get("page_title")[$key];
             $rules_itself["page_title_$key"]              = "required|unique:pages_translate,page_title,".$translate_row_id.",id,deleted_at,NULL";
             $attrs_names["page_title_$key.required"]      = "الإسم في ".$lang_item->lang_text." مطلوب إدخالة ";
             $attrs_names["page_title_$key.unique"]        = "الإسم في ".$lang_item->lang_text." مسجل مسبقا ";
@@ -242,7 +242,7 @@ class pagesController extends adminBaseController
             $rules_itself["page_body_$key"]               = "required";
             $attrs_names["page_body_$key.required"]       = "المحتوي في ".$lang_item->lang_text." مطلوب إدخالة ";
 
-            $rules_values["page_slug_$key"]               = clean($request->get("page_slug")[$key]);
+            $rules_values["page_slug_$key"]               = $request->get("page_slug")[$key];
             $rules_itself["page_slug_$key"]               = "required|unique:pages_translate,page_slug,".$translate_row_id.",id,deleted_at,NULL";
             $attrs_names["page_slug_$key.required"]       = "اللينك في ".$lang_item->lang_text." مطلوب إدخالة ";
             $attrs_names["page_slug_$key.unique"]         = "اللينك في ".$lang_item->lang_text." مسجل مسبقا ";
@@ -260,7 +260,7 @@ class pagesController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval($request->get("item_id",0));
 
         #region remove dependencies
 

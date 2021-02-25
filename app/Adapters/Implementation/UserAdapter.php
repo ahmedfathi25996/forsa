@@ -22,7 +22,6 @@ use Illuminate\Support\Facades\Auth;
 
 class UserAdapter implements IUserAdapter {
 
-    #region User
     function check_user_exist($cond)
     {
         return User::where($cond)->first();
@@ -58,9 +57,6 @@ class UserAdapter implements IUserAdapter {
             ->get()->first();
     }
 
-
-
-
     function getUserProfile($user_id)
     {
         $cond       = [];
@@ -68,36 +64,9 @@ class UserAdapter implements IUserAdapter {
         return User::get_users($additional_and_wheres = $cond)->all();
     }
 
-
-
     function createUser($data)
     {
         return User::create($data);
-    }
-
-    function generateUserSerial($user)
-    {
-        $serial_number = rand(1000000000,9999999999).$user->user_id;
-        User::find($user->user_id)->update([
-            "serial_number" => $serial_number
-        ]);
-    }
-
-    function generateReferralCode($user)
-    {
-        $user_referral_code =substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 10).$user->user_id;
-        User::find($user->user_id)->update([
-            "referral_code" => $user_referral_code
-        ]);
-    }
-
-    function referralRegistration($user)
-    {
-        $setting = settings_m::where('setting_key','referral_points')->first();
-        if(is_object($setting))
-        {
-            $user->increment('user_points',$setting->setting_value);
-        }
     }
 
     function updateUser($data, $email)
@@ -109,7 +78,6 @@ class UserAdapter implements IUserAdapter {
     {
         return $user->update();
     }
-
 
     function updateUserProfile($data,$user_id)
     {
@@ -144,14 +112,12 @@ class UserAdapter implements IUserAdapter {
 
     }
 
-
     function revokeToken($user)
     {
 
         return DB::table('oauth_access_tokens')->where('user_id',$user->user_id)->update(['revoked'=>1]);
 
     }
-
 
     function updateNumber($data,$user_id){
         return User::where('user_id',$user_id)->where('number_verify',0)->update($data);
@@ -197,7 +163,6 @@ class UserAdapter implements IUserAdapter {
         return User::get_user_token($user_id);
     }
 
-
     function sendSupport($msg_arr)
     {
         return support_messages_m::create($msg_arr);
@@ -207,62 +172,6 @@ class UserAdapter implements IUserAdapter {
     {
         return User::where("user_type","admin")->orWhere("user_type","dev")->pluck('user_id')->all();
     }
-
-    function get_rule($points)
-    {
-        return redeem_rules_m::where('redeem_points',$points)->first();
-    }
-
-    function getRuleById($red_id)
-    {
-        return redeem_rules_m::where('red_id',$red_id)->first();
-
-    }
-
-    function convertPointsToMoney($user,$points)
-    {
-        $user_id = $user->user_id;
-        $get_rules = $this->get_rule($points);
-        return User::where('user_id',$user_id)->update([
-            "user_points"=> $user->user_points - $points,
-            "user_wallet" => $user->user_wallet + $get_rules->redeem_money
-        ]);
-
-    }
-
-
-
-    #endregion
-
-
-
-    #region plan
-
-    function getPlan()
-    {
-       return plan_m::where('plan_id',1)->first();
-    }
-
-    #endregion
-
-
-    #region redeem_rules
-    function get_rules()
-    {
-        return redeem_rules_m::get_redeem_rules()->all();
-
-    }
-    #endregion
-
-    #region user orders
-    function userOrders($user_id)
-    {
-        $cond       = [];
-        $cond[]     = ["user_obj.user_id","=",$user_id];
-        return orders_m::get_orders($cond);
-    }
-    #endregion
-
 
     function userNotifications($user_id)
     {
@@ -282,6 +191,7 @@ class UserAdapter implements IUserAdapter {
         $cond       = [];
         $cond[]     = ["doctors_sessions.session_date",">=", $now];
         $cond[]     = ["booking.is_paid", "=" , 1];
+        $cond[]     = ["doctors_sessions.is_done", "=" , 0];
         $cond[]     = ["doctors_sessions.is_booked", "=" , 1];
         if(Auth::user()->user_type == "user")
         {
@@ -361,11 +271,12 @@ class UserAdapter implements IUserAdapter {
         return $promoCode;
     }
 
-    function checkIfUserAllowedToRate($user_id,$doctor_id)
+    function checkIfUserAllowedToRate($user_id,$doctor_id,$session_id)
     {
         $cond       = [];
         $cond[]     = ["booking.user_id", "=" , $user_id];
-        $cond[]     = ["doctors_sessions.is_done", "=" , 1];
+        $cond[]     = ["doctors_sessions.session_id", "=" , $session_id];
+        $cond[]     = ["doctors_sessions.is_done", "=" , 0];
         $cond[]     = ["doctors_sessions.doctor_id", "=" , $doctor_id];
 
         $check = booking_m::get_user_bookings(

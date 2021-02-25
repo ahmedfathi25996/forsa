@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\traits\dashboardTrait;
-use App\models\branches\branch_m;
 use App\models\langs_m;
 use App\models\notification_m;
 use Illuminate\Support\Facades\Auth;

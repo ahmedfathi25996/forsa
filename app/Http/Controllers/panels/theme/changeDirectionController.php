@@ -15,7 +15,7 @@ class changeDirectionController extends adminBaseController
     public function index($locale)
     {
 
-        $locale = clean($locale);
+        $locale = ($locale);
 
         session([
             'locale' => $locale

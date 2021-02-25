@@ -17,10 +17,10 @@ trait dashboardTrait
     {
 
         $output     = [];
-        $item_id    = intval(clean($request->get("item_id", 0)));
+        $item_id    = intval(($request->get("item_id", 0)));
 
         if($model_name == ""){
-            $model_name = clean($request->get("table_name")); // App\User
+            $model_name = ($request->get("table_name")); // App\User
         }
 
         if ($item_id > 0) {
@@ -44,9 +44,9 @@ trait dashboardTrait
 
     public function reorder_items(Request $request) {
 
-        $items          = clean($request->get("items"));
-        $model_name     = clean($request->get("table_name"));  // App\User
-        $field_name     = clean($request->get("field_name"));
+        $items          = ($request->get("items"));
+        $model_name     = ($request->get("table_name"));  // App\User
+        $field_name     = ($request->get("field_name"));
 
         $output         = [];
 
@@ -79,21 +79,21 @@ trait dashboardTrait
     public function new_accept_item(Request $request,$model_name="",$field_name="") {
 
         $output     = [];
-        $item_id    = intval(clean($request->get("item_id",0)));
+        $item_id    = intval(($request->get("item_id",0)));
 
         if($model_name == ""){
-            $model_name = clean($request->get("table_name"));
+            $model_name = ($request->get("table_name"));
         }
 
         if($field_name == ""){
-            $field_name = clean($request->get("field_name"));
+            $field_name = ($request->get("field_name"));
         }
 
-        $accept                 = clean($request->get("accept"));
-        $item_primary_col       = clean($request->get("item_primary_col"));
+        $accept                 = ($request->get("accept"));
+        $item_primary_col       = ($request->get("item_primary_col"));
         $accepters_data         = $request->get("acceptersdata");
-        $accept_url             = clean($request->get("accept_url"));
-        $display_block          = clean($request->get("display_block"));
+        $accept_url             = ($request->get("accept_url"));
+        $display_block          = ($request->get("display_block"));
 
 
         if ($item_id > 0) {
@@ -112,12 +112,12 @@ trait dashboardTrait
     public function general_self_edit(Request $request) {
 
         $output                 = [];
-        $item_id                = clean($request->get("item_id"));
-        $model_name             = clean($request->get("table_name"));
-        $field_name             = clean($request->get("field_name"));
-        $value                  = clean($request->get("value"));
-        $input_type             = clean($request->get("input_type"));
-        $row_primary_col        = clean($request->get("row_primary_col"));
+        $item_id                = ($request->get("item_id"));
+        $model_name             = ($request->get("table_name"));
+        $field_name             = ($request->get("field_name"));
+        $value                  = ($request->get("value"));
+        $input_type             = ($request->get("input_type"));
+        $row_primary_col        = ($request->get("row_primary_col"));
 
         $output["success"]      = "";
         $output["status"]       = "";

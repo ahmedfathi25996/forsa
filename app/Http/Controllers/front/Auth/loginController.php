@@ -45,8 +45,8 @@ class loginController extends frontBaseController
 
         $email_login = Auth::attempt(
             [
-                "email"         => clean($request->get("email")),
-                "password"      => clean($request->get("password"))
+                "email"         => $request->get("email"),
+                "password"      => $request->get("password")
             ],
             $request->get("remember_me"));
 
@@ -96,7 +96,7 @@ class loginController extends frontBaseController
     public function change_password(Request $request)
     {
 
-        $user_code = clean($request->get("user_code"));
+        $user_code = $request->get("user_code");
 
         $user = User::where("user_code", $user_code)->get()->first();
 
@@ -113,7 +113,7 @@ class loginController extends frontBaseController
     public function save_change_password(Request $request)
     {
 
-        $user_code = clean($request->get("user_code"));
+        $user_code = $request->get("user_code");
         $password = $request->get("password");
 
         $user = User::where("user_code", $user_code)->get()->first();

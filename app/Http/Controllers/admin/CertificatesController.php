@@ -5,8 +5,6 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\adminBaseController;
 use App\models\doctors\certificates\certificates_m;
 use App\models\doctors\certificates\certificates_translate_m;
-use App\models\days\days_m;
-use App\models\days\days_translate_m;
 use App\models\specialites\specialites_translate_m;
 use App\models\specialites\specialites_m;
 use Illuminate\Http\Request;
@@ -49,7 +47,7 @@ class CertificatesController extends adminBaseController
     {
 
         $this->getAllLangs();
-        $doctor_id    = intval(clean($doctor_id));
+        $doctor_id    = intval($doctor_id);
         $this->data["item_data"]                = "";
         $this->data["item_data_translate"]      = collect([]);
         $this->data['doctor_id'] = $doctor_id;
@@ -57,7 +55,7 @@ class CertificatesController extends adminBaseController
         if ($cer_id != null)
         {
 
-            $cer_id    = intval(clean($cer_id));
+            $cer_id    = intval($cer_id);
 
             $cond       = [];
             $cond[]     = ["doctors_certificates.cer_id","=",$cer_id];
@@ -84,7 +82,7 @@ class CertificatesController extends adminBaseController
                 // update
                 if ($cer_id != null) {
 
-                    $check = certificates_m::find($cer_id)->update(clean($request->all()));
+                    $check = certificates_m::find($cer_id)->update($request->all());
 
                     if ($check == true) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -100,7 +98,7 @@ class CertificatesController extends adminBaseController
                     // insert
                     $request["doctor_id"] = $doctor_id;
 
-                    $check = certificates_m::create(clean($request->all()));
+                    $check = certificates_m::create($request->all());
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -122,7 +120,7 @@ class CertificatesController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["cer_id"]   = $cer_id;
-                    $inputs["title"] = clean(array_shift($input_data["title"]));
+                    $inputs["title"] = array_shift($input_data["title"]);
                     $inputs["lang_id"]  = $lang_item->lang_id;
 
                     $current_row = $this->data["item_data_translate"]->filter(function ($value, $key) use ($lang_item) {
@@ -200,7 +198,7 @@ class CertificatesController extends adminBaseController
                 $translate_row_id   = $current_row->first()->id;
             }
 
-            $rules_values["title_$key"]              = clean($request->get("title")[$key]);
+            $rules_values["title_$key"]              = $request->get("title")[$key];
             $rules_itself["title_$key"]              = "required|unique:specialites_translate,title,".$translate_row_id.",id,deleted_at,NULL";
 
             $attrs_names["title_$key.required"]      = "الإسم في ".$lang_item->lang_text." مطلوب إدخالة ";
@@ -216,7 +214,7 @@ class CertificatesController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval($request->get("item_id",0));
 
         #region remove dependencies
 

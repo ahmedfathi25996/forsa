@@ -51,7 +51,7 @@ class paymentMethodController extends adminBaseController
         if ($payment_method_id != null)
         {
 
-            $payment_method_id    = intval(clean($payment_method_id));
+            $payment_method_id    = intval(($payment_method_id));
 
             $cond       = [];
             $cond[]     = ["payment_method.payment_method_id","=",$payment_method_id];
@@ -92,7 +92,7 @@ class paymentMethodController extends adminBaseController
 
                 // update
                 if ($payment_method_id != null) {
-                    $check = payment_method_m::find($payment_method_id)->update(clean($input_data ));
+                    $check = payment_method_m::find($payment_method_id)->update(($input_data ));
 
 
                     if ($check == true) {
@@ -108,7 +108,7 @@ class paymentMethodController extends adminBaseController
                 } else {
 
                     // insert
-                    $check = payment_method_m::create(clean($input_data));
+                    $check = payment_method_m::create(($input_data));
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -130,7 +130,7 @@ class paymentMethodController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["payment_method_id"]   = $payment_method_id;
-                    $inputs["payment_method_name"] = clean(array_shift($input_data["payment_method_name"]));
+                    $inputs["payment_method_name"] = (array_shift($input_data["payment_method_name"]));
 
 
                     $inputs["lang_id"]       = $lang_item->lang_id;
@@ -188,7 +188,7 @@ class paymentMethodController extends adminBaseController
         $rules_itself           = [];
         $attrs_names            = [];
 
-        $payment_method_name    = clean($request["payment_method_name"]);
+        $payment_method_name    = ($request["payment_method_name"]);
 
         $rules_values["payment_img_file"]              = $request['payment_img_file'];
         $rules_itself["payment_img_file"]              = "nullable|image|mimes:jpg,jpeg,bmp,png,gif";
@@ -199,7 +199,7 @@ class paymentMethodController extends adminBaseController
         foreach($all_langs as $key => $lang_item)
         {
 
-            $current_name = clean(array_shift($payment_method_name));
+            $current_name = (array_shift($payment_method_name));
             if (in_array($current_name, $payment_method_name) && !empty($current_name))
             {
                 $this->data["success"] = "<div class = 'alert alert-danger'>لا يمكن تكرار اسم وسيلة الدفع</div>";
@@ -220,7 +220,7 @@ class paymentMethodController extends adminBaseController
                 $translate_row_id   = $current_row->first()->id;
             }
 
-            $rules_values["payment_method_name_$key"]              = clean($request->get("payment_method_name")[$key]);
+            $rules_values["payment_method_name_$key"]              = ($request->get("payment_method_name")[$key]);
             $rules_itself["payment_method_name_$key"]              = "required|unique:payment_method_translate,payment_method_name,".$translate_row_id.",id,deleted_at,NULL";
             $attrs_names["payment_method_name_$key.required"]      = "الإسم في ".$lang_item->lang_text." مطلوب إدخالة ";
             $attrs_names["payment_method_name_$key.unique"]        = "الإسم في ".$lang_item->lang_text." مسجل مسبقا ";

@@ -36,7 +36,7 @@ class adminController extends adminBaseController
         if ($user_id != null)
         {
 
-            $user_id    = intval(clean($user_id));
+            $user_id    = intval($user_id);
 
             $cond       = [];
             $cond[]     = ["users.user_id","=",$user_id];
@@ -102,7 +102,7 @@ class adminController extends adminBaseController
                     }
 
 
-                    $check = User::find($user_id)->update(clean( $input_data));
+                    $check = User::find($user_id)->update( $input_data);
 
                     if ($check == true) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -117,7 +117,7 @@ class adminController extends adminBaseController
                 } else {
 
                     // insert
-                    $check = User::create(clean( $input_data));
+                    $check = User::create( $input_data);
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -171,23 +171,23 @@ class adminController extends adminBaseController
         $rules_itself           = [];
         $attrs_names            = [];
 
-        $rules_values["full_name"]                              = clean($request->get("full_name"));
+        $rules_values["full_name"]                              = $request->get("full_name");
         $rules_itself["full_name"]                              ="required|unique:users,full_name,".$user_id.",user_id,deleted_at,NULL";
         $attrs_names["full_name.required"]                      = "  اسم المستخدم مطلوب ادخاله ";
         $attrs_names["full_name.unique"]                        = " هذا الاسم مسجل مسبقا ";
 
 
-        $rules_values["email"]                                  = clean($request->get("email"));
+        $rules_values["email"]                                  = $request->get("email");
         $rules_itself["email"]                                  ="required|email|unique:users,email,".$user_id.",user_id,deleted_at,NULL";
         $attrs_names["email.required"]                          = "  ايميل المستخدم مطلوب ادخاله ";
         $attrs_names["email.email"]                             = "هذا الايميل غير صحيح ";
         $attrs_names["email.unique"]                            = " هذا الايميل مسجل مسبقا ";
 
-        $rules_values["password"]                               = clean($request['password']);
+        $rules_values["password"]                               = $request['password'];
         $rules_itself["password"]                               ="confirmed";
         $attrs_names["password.confirmed"]                      = "  الرقم السري لا يتطابق ";
 
-        $rules_values["password_confirmation"]                  = clean($request->get("password_confirmation"));
+        $rules_values["password_confirmation"]                  = $request->get("password_confirmation");
         $rules_itself["password_confirmation"]                  ="required_with:new_password";
         $attrs_names["password_confirmation.required_with"]     = " تاكيد الرقم السري مطلوب ادخاله ";
 

@@ -16,7 +16,7 @@ class APILocalization {
         #region localization
 
         $language =  $request->header('Accept-Language'); // ex. en or ar
-        $language = clean($language);
+        $language = ($language);
 
         $lang_id = 1;
         if(!empty($language))

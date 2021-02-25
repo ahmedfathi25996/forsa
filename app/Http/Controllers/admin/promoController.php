@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\adminBaseController;
-use App\models\orders\orders_m;
 use App\models\promo_code_m;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -47,7 +46,7 @@ class promoController extends adminBaseController
         if ($code_id != null)
         {
 
-            $code_id    = intval(clean($code_id));
+            $code_id    = intval(($code_id));
 
             $cond       = [];
             $cond[]     = ["promo_code.code_id","=",$code_id];
@@ -76,10 +75,10 @@ class promoController extends adminBaseController
                 // update
                 if ($code_id != null) {
                     $promo_obj = promo_code_m::find($code_id);
-                    $promo_obj->update(clean($input_data));
+                    $promo_obj->update(($input_data));
                 }
                 else {
-                    $promo_obj = promo_code_m::create(clean($input_data));
+                    $promo_obj = promo_code_m::create(($input_data));
                 }
 
                 return Redirect::to("admin/promo_code/save/$promo_obj->code_id")->
@@ -107,17 +106,17 @@ class promoController extends adminBaseController
         $attrs_names            = [];
 
 
-        $rules_values["code_text"]                  = clean($request->get("code_text"));
+        $rules_values["code_text"]                  = ($request->get("code_text"));
         $rules_itself["code_text"]                  ="required|unique:promo_code,code_text,".$code_id.",code_id,deleted_at,NULL";
         $attrs_names["code_text.required"]          = "  كود الخصم مطلوب ادخاله ";
         $attrs_names["code_text.unique"]            = "  كود الخصم مسجل مسبقا  ";
 
-        $rules_values["start_date"]                 = clean($request->get("start_date"));
+        $rules_values["start_date"]                 = ($request->get("start_date"));
         $rules_itself["start_date"]                 ="required";
         $attrs_names["start_date.required"]         = "  تاريخ بداية كود الخصم مطلوب ادخاله ";
 
 
-        $rules_values["end_date"]                   = clean($request->get("end_date"));
+        $rules_values["end_date"]                   = ($request->get("end_date"));
         $rules_itself["end_date"]                   ="required|after:start_date";
         $attrs_names["end_date.required"]           = "  تاريخ نهايه كود الخصم مطلوب ادخاله ";
         $attrs_names["end_date.after"]              = "وقت النهايه يجب ان يكون اكبر من تاريخ البدايه ";
@@ -125,7 +124,7 @@ class promoController extends adminBaseController
 
 
 
-        $rules_values["code_value"]                 = clean($request->get("code_value"));
+        $rules_values["code_value"]                 = ($request->get("code_value"));
         $rules_itself["code_value"]                 = "required|numeric|min:0|not_in:0";
         $attrs_names["code_value.required"]         = "   قيمة الخصم مطلوب ادخاله ";
         $attrs_names["code_value.numeric"]          = "  الخصم يجب ان يكون رقم فقط ";
@@ -142,7 +141,7 @@ class promoController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         #endregion
 

@@ -77,7 +77,6 @@ class UserController extends api_controller
 
     }
 
-
     public function updateProfileImage(Request $request)
     {
         $user = Auth::user();
@@ -202,14 +201,13 @@ class UserController extends api_controller
 
     }
 
-
     public function changePassword(Request $request)
     {
 
         $rules_values["password"]                      = $request["password"];
         $rules_itself["password"]                      = "confirmed";
 
-        $rules_values["password_confirmation"]         = clean($request->get("password_confirmation"));
+        $rules_values["password_confirmation"]         = ($request->get("password_confirmation"));
         $rules_itself["password_confirmation"]         ="required_with:password";
 
         $data = $request->all();
@@ -241,7 +239,6 @@ class UserController extends api_controller
 
     }
 
-
     public function sendSupport(Request $request)
     {
 
@@ -249,15 +246,12 @@ class UserController extends api_controller
         $user = Auth::user();
 
         $messages = [
-            'msg_type.required' => Lang::get("user.require_msg_type"),
-            'msg_type.in'       => Lang::get("user.in_msg_type"),
             'message.required'  => Lang::get("user.require_message"),
         ];
 
         $validator = $this->validator->getValidationErrorsWithRequest(
             $request->all(),
             [
-                'msg_type'      => 'required|in:support',
                 'message'       => 'required',
                 'email'         => 'email'
             ],
@@ -272,32 +266,10 @@ class UserController extends api_controller
 
     }
 
-    public function getRedeemRules()
-    {
-        return $this->service->getRedeemRules();
-    }
-
-
-    public function redeemMoney(Request $request)
-    {
-        $user = Auth::user();
-        $data = $request->all();
-        return $this->service->redeemMoney($data,$user);
-    }
-
     public function getUserWallet()
     {
         $user = Auth::user();
         return $this->service->getUserWallet($user);
-
-    }
-
-
-
-    public function userOrders()
-    {
-        $user = Auth::user();
-        return $this->service->userOrders($user);
 
     }
 
@@ -382,6 +354,11 @@ class UserController extends api_controller
         return $this->service->rateDoctor($data, $doctor_id,$session_id);
     }
 
+    public function getNofifications()
+    {
+        $user = Auth::user();
+        return $this->service->getNofifications($user);
+    }
 
     #region video call
     public function session($session_id)
@@ -396,16 +373,14 @@ class UserController extends api_controller
         }        return view('front.session',compact('token','channel_name','appid'));
     }
 
-
     public function join_video($channel_name,$appid,$token)
     {
         return view("front.video",compact('token','channel_name','appid'));
     }
 
-    public function getNofifications()
+    public function cancelBooking($session_id)
     {
-        $user = Auth::user();
-        return $this->service->getNofifications($user);
+        return $this->service->cancelBooking($session_id);
     }
 
     #endregion

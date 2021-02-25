@@ -32,83 +32,34 @@
                 <h6 class="slim-pagetitle">لوحة التحكم</h6>
             </div><!-- slim-pageheader -->
 
-            <div class="dash-headline">
-                <div class="dash-headline-left">
-                    <div class="dash-headline-item-one">
-                        <div id="chartArea1" class="dash-chartist"></div>
-                        <div class="dash-item-overlay">
-                            <h1>0.0345 <span class="tx-24">BTC</span></h1>
-                            <p class="earning-label">Bitcoin Earnings</p>
-                            <p class="earning-desc">Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus...</p>
-                            <a href="#" class="statement-link">View Statements <i class="fa fa-angle-right mg-l-5"></i></a>
-                        </div>
-                    </div><!-- dash-headline-item-one -->
-                </div><!-- dash-headline-left -->
-
-                <div class="dash-headline-right">
-                    <div class="dash-headline-right-top">
-                        <div class="dash-headline-item-two">
-                            <div id="chartMultiBar1" class="chart-rickshaw"></div>
-                            <div class="dash-item-overlay">
-                                <h4>0.0873 <span class="tx-20">ETH</span></h4>
-                                <p class="item-label">Ethereum Wallet</p>
-                                <p class="item-desc">Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus...</p>
-                                <a href="#" class="report-link">View Report <i class="fa fa-angle-right mg-l-5"></i></a>
-                            </div>
-                        </div><!-- dash-headline-item-two -->
-                    </div><!-- dash-headline-right-top -->
-                    <div class="dash-headline-right-bottom">
-                        <div class="dash-headline-right-bottom-left">
-                            <div class="dash-headline-item-three">
-                                <span id="sparkline3" class="sparkline wd-100p">1,4,4,7,5,9,10,5,4,4,7,5,9,10</span>
-                                <div>
-                                    <h1>29,931</h1>
-                                    <p class="item-label">Male Visitors</p>
-                                    <p class="item-desc">Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus...</p>
-                                </div>
-                            </div><!-- dash-headline-item-three -->
-                        </div><!-- dash-headline-right-bottom-left -->
-                        <div class="dash-headline-right-bottom-right">
-                            <div class="dash-headline-item-three">
-                                <span id="sparkline4" class="sparkline wd-100p">1,4,4,7,5,7,4,3,4,4,6,5,9,7</span>
-                                <div>
-                                    <h1>45,231</h1>
-                                    <p class="item-label">Female Visitors</p>
-                                    <p class="item-desc">Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus...</p>
-                                </div>
-                            </div><!-- dash-headline-item-three -->
-                        </div><!-- dash-headline-right-bottom-right -->
-                    </div><!-- dash-headline-right-bottom -->
-                </div><!-- wd-50p -->
-            </div><!-- d-flex ht-100v -->
 
             <div class="card card-dash-one mg-t-20">
                 <div class="row no-gutters">
                     <div class="col-lg-3">
                         <i class="icon ion-ios-analytics-outline"></i>
                         <div class="dash-content">
-                            <label class="tx-primary">Impressions</label>
+                            <label class="tx-primary">العملاء</label>
                             <h2>822,490</h2>
                         </div><!-- dash-content -->
                     </div><!-- col-3 -->
                     <div class="col-lg-3">
                         <i class="icon ion-ios-pie-outline"></i>
                         <div class="dash-content">
-                            <label class="tx-success">Page Visits</label>
+                            <label class="tx-success">الاطباء</label>
                             <h2>465,183</h2>
                         </div><!-- dash-content -->
                     </div><!-- col-3 -->
                     <div class="col-lg-3">
                         <i class="icon ion-ios-stopwatch-outline"></i>
                         <div class="dash-content">
-                            <label class="tx-purple">Commision</label>
+                            <label class="tx-purple">الجلسات المحجوزة</label>
                             <h2>781,524</h2>
                         </div><!-- dash-content -->
                     </div><!-- col-3 -->
                     <div class="col-lg-3">
                         <i class="icon ion-ios-world-outline"></i>
                         <div class="dash-content">
-                            <label class="tx-danger">Earnings</label>
+                            <label class="tx-danger">الجلسات المنتهية</label>
                             <h2>369,657</h2>
                         </div><!-- dash-content -->
                     </div><!-- col-3 -->

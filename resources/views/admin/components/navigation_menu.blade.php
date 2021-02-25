@@ -42,6 +42,12 @@
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="{{url("/admin/support_messages")}}">
+                    <span>رسائل الدعم</span>
+                </a>
+            </li>
+
         </ul>
     </div><!-- container -->
 </div><!-- slim-navbar -->

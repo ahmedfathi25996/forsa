@@ -5,7 +5,7 @@
 
             $normal_tags =
                 [
-                    "name", "version","referral_points"
+                    "name","website_percentage"
                 ];
 
             $attrs          = generate_default_array_inputs_html(
@@ -17,16 +17,13 @@
             );
 
             $attrs[0]["name"]               = 'اسم التطبيق '.$required_sign;
-            $attrs[0]["version"]            = 'النسخه الحالية للتطبيق ';
-            $attrs[0]["referral_points"]    = 'عدد النقاط التي يحصل عليها المستخدم من مشاركة الرقم التسلسلي ';
+            $attrs[0]["website_percentage"]    = 'نسبة السيستم من كل حجز ';
 
-            $attrs[2]["version"]            = "disabled";
 
-            $attrs[3]["referral_points"]    = "number";
+            $attrs[3]["website_percentage"]    = "number";
 
             $attrs[4]["name"]               = $settings['name'][0]->setting_value;
-            $attrs[4]["version"]            = $settings['version'][0]->setting_value;
-            $attrs[4]["referral_points"]    = $settings['referral_points'][0]->setting_value;
+            $attrs[4]["website_percentage"]    = $settings['website_percentage'][0]->setting_value;
 
             echo
             generate_inputs_html(
@@ -40,51 +37,6 @@
             );
 
 
-            echo
-            generate_select_tags(
-                $field_name         = "allowed_countries",
-                $label_name         = "إختار الدول المتاح فيها البيع ؟ ".$required_sign,
-                $text               = array_values(list_countries()),
-                $values             = array_keys(list_countries()),
-                $selected_value     = json_decode($settings['allowed_countries'][0]->setting_value),
-                $class              = "form-control select2",
-                $multiple           = "multiple",
-                $required           = "",
-                $disabled           = "",
-                $data               = "" ,
-                $grid               = "col-lg-12"
-            );
-
-
-            echo
-            generate_select_tags(
-                $field_name         = "type",
-                $label_name         = "إختار المجال ؟ ".$required_sign,
-                $text               = ["مطاعم", "ملابس", "صيدليات", "ماركت", "أخري"],
-                $values             = ["restaurants", "clothes", "pharmacies", "markets", "other"],
-                $selected_value     = [$settings['type'][0]->setting_value],
-                $class              = "form-control select_2_primary",
-                $multiple           = "",
-                $required           = "",
-                $disabled           = "",
-                $data               = "" ,
-                $grid               = "col-lg-6"
-            );
-
-            echo
-            generate_select_tags(
-                $field_name         = "timezone",
-                $label_name         = "إختار التوقيت ؟ ".$required_sign,
-                $text               = $timezones,
-                $values             = $timezones,
-                $selected_value     = [$settings['timezone'][0]->setting_value],
-                $class              = "form-control select2_search",
-                $multiple           = "",
-                $required           = "",
-                $disabled           = "",
-                $data               = "" ,
-                $grid               = "col-lg-6"
-            );
 
         ?>
 
@@ -137,14 +89,6 @@
     </div>
 
 
-    <?php if(false): ?>
-        <div class="row mg-b-25">
-            <p class="alert alert-warning">
-                <i class="icon ion-information-circled"></i>
-                <b>برجاء العلم انه اذا تم تغيير المنطقه فسيتم تغيير تواريخ العرض في التطبيق !</b> <br>
-            </p>
-        </div>
-    <?php endif; ?>
 
 
 </div>

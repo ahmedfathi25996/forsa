@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\adminBaseController;
-use App\models\days\days_m;
-use App\models\days\days_translate_m;
 use App\models\doctors\doctors_sessions_m;
 use App\models\specialites\specialites_translate_m;
 use App\models\specialites\specialites_m;
@@ -47,14 +45,14 @@ class SessionController extends adminBaseController
     {
 
         $this->getAllLangs();
-        $doctor_id    = intval(clean($doctor_id));
+        $doctor_id    = intval(($doctor_id));
         $this->data["item_data"]                = "";
         $this->data['doctor_id'] = $doctor_id;
 
         if ($session_id != null)
         {
 
-            $session_id    = intval(clean($session_id));
+            $session_id    = intval(($session_id));
 
             $cond       = [];
             $cond[]     = ["doctors_sessions.session_id","=",$session_id];
@@ -108,7 +106,7 @@ class SessionController extends adminBaseController
                 // update
                 if ($session_id != null) {
 
-                    $check = doctors_sessions_m::find($session_id)->update(clean($request->all()));
+                    $check = doctors_sessions_m::find($session_id)->update(($request->all()));
 
                     if ($check == true) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -125,7 +123,7 @@ class SessionController extends adminBaseController
                     $request["doctor_id"] = $doctor_id;
                     $request['is_verified_by_admin'] = 1;
 
-                    $check = doctors_sessions_m::create(clean($request->all()));
+                    $check = doctors_sessions_m::create(($request->all()));
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -178,7 +176,7 @@ class SessionController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         $this->general_remove_item($request,'App\models\doctors\doctors_sessions_m');
     }

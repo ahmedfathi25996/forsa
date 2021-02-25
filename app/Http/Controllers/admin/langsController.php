@@ -42,7 +42,7 @@ class langsController extends adminBaseController
         if ($lang_id != null)
         {
 
-            $lang_id        = intval(clean($lang_id));
+            $lang_id        = intval($lang_id);
 
             $cond           = [];
             $cond[]         = ["langs.lang_id","=",$lang_id];
@@ -67,7 +67,7 @@ class langsController extends adminBaseController
             if (count($validator->messages()) == 0)
             {
 
-                $request["lang_symbole"] = string_safe(clean($request["lang_symbole"]));
+                $request["lang_symbole"] = string_safe($request["lang_symbole"]);
 
                 $request["lang_img_id"] = $this->general_save_img(
                     $request ,
@@ -86,7 +86,7 @@ class langsController extends adminBaseController
                 if ($lang_id != null)
                 {
 
-                    $check = langs_m::find($lang_id)->update(clean($request->all()));
+                    $check = langs_m::find($lang_id)->update($request->all());
 
                     if ($check == true)
                     {
@@ -100,7 +100,7 @@ class langsController extends adminBaseController
                 else{
 
                     // insert
-                    $check = langs_m::create(clean($request->all()));
+                    $check = langs_m::create($request->all());
 
                     if (is_object($check))
                     {
@@ -136,8 +136,8 @@ class langsController extends adminBaseController
         $rules_itself           = [];
         $attrs_names            = [];
 
-        $lang_text              = clean($request->get("lang_text"));
-        $lang_symbole           = string_safe(clean($request->get("lang_symbole")));
+        $lang_text              = $request->get("lang_text");
+        $lang_symbole           = string_safe($request->get("lang_symbole"));
         $lang_img_file          = $request["lang_img_file"];
 
 
@@ -164,7 +164,7 @@ class langsController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval($request->get("item_id",0));
         if ($item_id == 0)
         {
             $output["deleted"] = "<label class='alert alert-danger'>اللغه غير موجودة</label>";

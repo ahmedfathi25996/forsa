@@ -75,33 +75,30 @@ class UserTransformer extends Transformer
             $data['diagnosis']    = isset($item['diagnosis'])?$item['diagnosis']:"";
             $data['forsa_tanya_knowing'] = isset($item['forsa_tanya_knowing'])?$item['forsa_tanya_knowing']:"";
         }
+        if(Auth::user()->user_type == 'doctor')
+        {
+            $get_doctor = doctors_m::where("user_id",Auth::user()->user_id)->first();
+            if(is_object($get_doctor))
+            {
+                $rating = $get_doctor->rating;
+                $data['rating']    = $rating?$rating:0;
+            }
+
+            $count = ratings_m::where("doctor_id",$get_doctor->doctor_id)->count();
+            $data['user_rated_count'] = $count?$count:0;
+
+            $data['sessions_count']    = $get_doctor->sessions_count?$get_doctor->sessions_count:0;
+
+
+        }
 
         $data['user_wallet']      = isset($item['user_wallet'])?floatval($item['user_wallet']):0;
         $data['user_provider']    = isset($item['user_provider'])?$item['user_provider']:'';
+        $data['user_type']    = isset($item['user_type'])?$item['user_type']:'';
+
 
 
         return $data;
-    }
-
-    public function transformUserOrders($orders)
-    {
-        $allData = [];
-        foreach ($orders as $order){
-            $item = [];
-
-            $item["order_id"]     = isset($order["order_id"])?intval($order["order_id"]):0;
-            $item['offer_title']  = isset($order['offer_title'])?$order['offer_title']:'';
-            $item["offer_type"]   = isset($order["offer_type_name"])?$order["offer_type_name"]:'';
-            $item["order_date"]   = isset($order["order_date"])?$order["order_date"]:'';
-            $item['offer_image']  =url("public/images/no_image.png");
-            if(!empty($order["logo_path"]) && $order["logo_path"] != "T")
-            {
-                $item['offer_image'] = isset($order["logo_path"])?url($order["logo_path"]):'';
-            }
-            $allData[] = $item;
-        }
-
-        return array_values($allData);
     }
 
     public function transformUserNotifications($notifications)
@@ -124,33 +121,6 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-
-    public function transformRedeemRules($rules)
-    {
-        $allData = [];
-        foreach ($rules as $rule){
-            $item = [];
-
-            $item["red_id"]          = isset($rule["red_id"])?intval($rule["red_id"]):0;
-            $item['redeem_money']    = isset($rule['redeem_money'])?$rule['redeem_money']:0;
-            $item["redeem_points"]   = isset($rule["redeem_points"])?$rule["redeem_points"]:0;
-
-            $allData[] = $item;
-        }
-
-        return array_values($allData);
-    }
-
-    public function transformUserWallet($item)
-    {
-        $data = [];
-        $data['user_id']            = isset($item['user_id'])?intval($item['user_id']):0;
-        $data['user_wallet']        = isset($item['user_wallet'])?$item['user_wallet']:0;
-        $data['user_points']        = isset($item['user_points'])?$item['user_points']:0;
-
-        return $data;
-    }
-
     public function transformListAllDoctors($doctors)
     {
         $data = [];
@@ -159,15 +129,12 @@ class UserTransformer extends Transformer
 
         foreach($doctors as $item)
         {
-            $avg  = ratings_m::where("doctor_id",$item->doctor_id)->avg("rate");
-
             $data['id']             = isset($item->doctor_id)?$item->doctor_id:0;
             $data['doctor_name']           = isset($item->full_name)?$item->full_name:"";
             $data['job_title']       = isset($item->job_title)?$item->job_title:"";
             $data['price']          = isset($item->price)?$item->price:0;
-            $data['price_for_thirty_minutes']          = isset($item->price_for_thirty)?$item->price_for_thirty:0;
             $data['specialties']          = isset($item->specialties)?$item->specialties:"";
-            $data['rating']          = isset($avg)?number_format($avg,2):0;
+            $data['rating']          = isset($item->rating)?$item->rating:0;
             $data['image']          =url("public/images/no_image.png");
             if(!empty($item->doctor_image_path) && $item->doctor_image_path != "T")
             {
@@ -211,10 +178,11 @@ class UserTransformer extends Transformer
         return $allData;
     }
 
-
-    public function transformSingleDoctor($item,$certificates_slider,$sessions,$today_sessions,$tomorrow_sessions,$ratings)
+    public function transformSingleDoctor($item,$certificates_slider,$sessions,$today_sessions,$tomorrow_sessions,$day_after_tomorrow,$ratings)
     {
         $avg  = ratings_m::where("doctor_id",$item['doctor_id'])->avg("rate");
+        $tomorrow_1 = date("Y-m-d", strtotime("+2 day"));
+
 
         $data['id']             = isset($item->doctor_id)?$item->doctor_id:0;
         $data['doctor_name']           = isset($item->full_name)?$item->full_name:"";
@@ -222,8 +190,7 @@ class UserTransformer extends Transformer
         $data['country']       = isset($item->country)?$item->country:"";
         $data['brief_bio']       = isset($item->brief_bio)?$item->brief_bio:"";
         $data['price']          = isset($item->price)?$item->price:0;
-        $data['price_for_thirty_minutes']          = isset($item->price_for_thirty)?$item->price_for_thirty:0;
-        $data['rating']          = isset($avg)?number_format($avg,2):0;
+        $data['rating']          = isset($item->rating)?$item->rating:0;
         $data['sessions_count']          = isset($item->sessions_count)?$item->sessions_count:0;
         $data['specialties']          = isset($item->specialties)?$item->specialties:"";
         $data['image']          =url("public/images/no_image.png");
@@ -258,6 +225,8 @@ class UserTransformer extends Transformer
         $data['today_sessions'] = $this->doctorSessions($today_sessions);
         $data['tomorrow_sessions'] = [];
         $data['tomorrow_sessions'] = $this->doctorSessions($tomorrow_sessions);
+        $data[$tomorrow_1]        = [];
+        $data[$tomorrow_1]         = $this->doctorSessions($day_after_tomorrow);
         $data['all_doctor_sessions'] = [];
         $data['all_doctor_sessions'] = $this->doctorSessions($sessions);
         $data['ratings'] = [];
@@ -301,7 +270,7 @@ class UserTransformer extends Transformer
         foreach ($sessions as $session){
             $item = [];
             #end region
-            $item["booking_id"]             = isset($session["book_id"])?intval($session["book_id"]):0;
+            $item["session_id"]             = isset($session["session_id"])?intval($session["session_id"]):0;
             $item['session_date']            = isset($session['session_date'])?$session['session_date']:"";
             $from_type = "AM";
             if($session['time_from'] > "12:00:00" )
@@ -727,6 +696,52 @@ class UserTransformer extends Transformer
                 $item['is_booked']     = 0;
 
 
+            }
+
+
+            $allData[] = $item;
+        }
+
+        return array_values($allData);
+    }
+
+    public function transformHomeBookedSessions($sessions)
+    {
+        $allData = [];
+        foreach ($sessions as $session){
+            $item = [];
+            $from_type = "AM";
+            if($session['time_from'] > "12:00:00" )
+            {
+                $from_type = "PM";
+            }
+            $to_type = "AM";
+            if($session['time_to'] > "12:00:00")
+            {
+                $to_type = "PM";
+            }
+            $item["time_from"]          = isset($session["time_from"])?date('h:i',strtotime($session["time_from"]))." ".$from_type:'';
+            $item["time_to"]          = isset($session["time_to"])?date('h:i',strtotime($session["time_to"]))." ".$to_type:'';
+
+            $allData[] = $item;
+        }
+
+        return array_values($allData);
+    }
+
+    public function transformDoctorWallet($wallet)
+    {
+        $allData = [];
+        foreach ($wallet as $wal){
+            $item = [];
+            $item["from_date"]          = isset($wal["from_date"])?$wal["from_date"]:'';
+            $item["to_date"]          = isset($wal["to_date"])?$wal["to_date"]:'';
+            $item["value"]          = isset($wal["value"])?$wal["value"]:'';
+            $item["value_for"]          = isset($wal["value_for"])?$wal["value_for"]:'';
+            $item['image']          =url("public/images/no_image.png");
+            if(!empty($wal['wallet_image_path']))
+            {
+                $item['image'] = isset($wal['wallet_image_path'])?url($wal['wallet_image_path']):'';
             }
 
 

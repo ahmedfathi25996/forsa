@@ -14,12 +14,17 @@ use App\models\bookings\booking_m;
 use App\models\doctors\doctors_m;
 use App\models\doctors\doctors_sessions_m;
 use App\models\doctors\ratings_m;
+use App\models\notification_m;
 use App\models\promo_code_m;
+use App\Notifications\mail\CancelSession;
 use App\Notifications\mail\sendVerificationCode;
+use App\Notifications\mail\SessionReminder;
 use App\Services\IUserService;
 use App\Transformers\UserTransformer;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
 
@@ -162,7 +167,6 @@ class UserService  implements IUserService
         return $this->messageHandler->postJsonSuccessResponse($msg,[]);
 
     }
-
 
     function changeMobile($request, $user, $data)
     {
@@ -424,7 +428,6 @@ class UserService  implements IUserService
 
     }
 
-
     function changePassword($user, $data)
     {
 
@@ -479,19 +482,17 @@ class UserService  implements IUserService
 
     }
 
-
-
     function sendSupport($user, $data)
     {
 
-        $msg_type       = $data["msg_type"];
+        $msg_type       = "support";
         $message        = $data["message"];
 
         $user_id    = 0;
         $name       = (isset($data["name"])?$data["name"]:"");
         $tel        = (isset($data["tel"])?$data["tel"]:"");
         $email        = (isset($data["email"])?$data["email"]:"");
-        if(is_object($user) && empty($name) && empty($tel))
+        if(is_object($user))
         {
 
             $user_id        = $user->user_id;
@@ -503,8 +504,9 @@ class UserService  implements IUserService
             }
             $get_user = $get_user[0];
 
-            $name = $get_user->full_name;
+            $name = $get_user->username;
             $tel  = $get_user->mobile_number;
+            $email = $get_user->email;
         }
 
         $msg_arr = [
@@ -555,74 +557,6 @@ class UserService  implements IUserService
 
     }
 
-    public function getRedeemRules()
-    {
-        $data = $this->adapter->get_rules();
-
-        $data = $this->transform->transformRedeemRules($data);
-        return $this->messageHandler->getJsonSuccessResponse("", $data);
-    }
-
-
-    function redeemMoney($data,$user)
-    {
-        $user_id    = $user->user_id;
-        $check_exist_user = $this->adapter->check_user_exist(
-            $cond = [
-                "user_id"     => $user_id
-            ]
-        );
-
-        if(!is_object($check_exist_user))
-        {
-            return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("auth.user_not_exist"));
-        }
-        $get_rules = $this->adapter->get_rules();
-
-        if(!is_array($get_rules) && !count($get_rules))
-        {
-            return $this->messageHandler->getJsonNotFoundErrorResponse("No Rules Found");
-        }
-
-
-/*
-        $closest = null;
-        foreach ($get_rules as $item) {
-
-            if ($closest === null || abs($user->user_points - $closest) > abs($item->redeem_points - $user->user_points)) {
-                $closest = $item->redeem_points;
-
-            }
-        }
-*/
-        $get_rule = $this->adapter->getRuleById($data['rule_id']);
-        if(!is_object($get_rule))
-        {
-            return $this->messageHandler->getJsonNotFoundErrorResponse("this is not a rule");
-        }
-
-        $redeem_points = $get_rule->redeem_points;
-
-         if($user->user_points < $redeem_points)
-         {
-             return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("user.no_enough_points"));
-         }
-
-          $this->adapter->convertPointsToMoney($user,$redeem_points);
-         $user_data = $this->adapter->check_user_exist(
-             $cond = [
-                 "user_id"     => $user_id
-             ]);
-
-
-        $result = $this->transform->transformUserWallet($user_data);
-
-        return $this->messageHandler->postJsonSuccessResponse(Lang::get("user.done_convert"),$result);
-
-
-
-    }
-
     public function getUserWallet($user)
     {
         $user_id = $user->user_id;
@@ -636,26 +570,6 @@ class UserService  implements IUserService
         return $this->messageHandler->getJsonSuccessResponse("", $result);
 
 
-    }
-
-    public function userOrders($user)
-    {
-        $user_id    = $user->user_id;
-        $check_exist_user = $this->adapter->check_user_exist(
-            $cond = [
-                "user_id"     => $user_id
-            ]
-        );
-
-        if(!is_object($check_exist_user))
-        {
-            return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("auth.user_not_exist"));
-        }
-
-        $data = $this->adapter->userOrders($user_id);
-        $result = $this->transform->transformUserOrders($data->all());
-
-        return $this->messageHandler->getJsonSuccessResponse("", $result);
     }
 
     public function userNotifications($user)
@@ -728,17 +642,6 @@ class UserService  implements IUserService
        // $minutes = abs(strtotime($time_from) - strtotime($time_to)) / 60;
 
         $doctor_price = $doctor->price;
-
-        $data['price_after_discount'] = $doctor_price;
-        $appid = "565e8fe5f9834c5a976ea6c06b2503ab";
-        $data['channel_name']  = md5("#!@!#!*&*(&" . "sponsor_btm" . "#!@!#!*&*(&" . time() . random_bytes(5));
-        $session_date = $get_session->session_date;
-        $time_to = $get_session->time_to;
-        $time = strtotime($session_date." ".$time_to);
-        $data['session_token'] = RtcTokenBuilder::buildTokenWithUid($appid,'a2d8f40705f44490b39449213ce29837',$data['channel_name'],null,1,$time);
-        if (strpos($data['session_token'], '/') !== false) {
-            $data['session_token'] = RtcTokenBuilder::buildTokenWithUid($appid,'a2d8f40705f44490b39449213ce29837',$data['channel_name'],null,1,$time);
-        }
         $book = $this->adapter->bookSession($data);
         $get_session->update([
             "is_booked" => 1
@@ -830,13 +733,16 @@ class UserService  implements IUserService
             return $this->messageHandler->getJsonNotFoundErrorResponse("Error");
 
         }
+        /*
         #region check if user is allowed to rate the doctor
-        $check = $this->adapter->checkIfUserAllowedToRate($user_id,$doctor_id);
+        $check = $this->adapter->checkIfUserAllowedToRate($user_id,$doctor_id,$session_id);
+        dd($check);
         if(! is_object($check))
         {
             return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("general.not_allowed_to_rate"));
         }
         #endregion
+        */
 
         #region check if your rated This Doctor Before
         $rating = ratings_m::where("user_id",$user_id)->where("doctor_id",$doctor_id)->where("session_id",$session_id)->first();
@@ -850,6 +756,11 @@ class UserService  implements IUserService
         $data['doctor_id'] = $doctor_id;
         $data['session_id'] = $session_id;
         ratings_m::create($data);
+        $avg  = ratings_m::where("doctor_id",$doctor_id)->avg("rate");
+        $doctor = doctors_m::where("doctor_id",$doctor_id)->first();
+        $doctor->update([
+            'rating' => $avg
+        ]);
         return $this->messageHandler->postJsonSuccessResponse(Lang::get("general.added_successfully"),[]);
     }
 
@@ -860,6 +771,77 @@ class UserService  implements IUserService
         $result = $this->transform->transformNotifications($data->all());
 
         return $this->messageHandler->getJsonSuccessResponse("", $result);
+    }
+
+    public function cancelBooking($session_id)
+    {
+        $cond[] = ["booking.session_id","=",$session_id];
+        $booking =  booking_m::get_user_bookings(
+            $additional_and_wheres  = $cond, $free_conditions  = "",
+            $order_by_col           = "", $order_by_type    = "",
+            $limit                  = 0 , $offset           = 0,
+            $paginate               = 10 , $return_obj       = "yes"
+        );
+        $get_session = doctors_sessions_m::where("session_id",$session_id)->first();
+        $current_date = time();
+        $session_date = strtotime($booking->session_date." ".$booking->time_from);
+        if($current_date > $session_date)
+        {
+            return $this->messageHandler->getJsonNotFoundErrorResponse("You can not cancel this booking");
+
+        }
+
+        if($booking->is_canceled == 1)
+        {
+            return $this->messageHandler->getJsonNotFoundErrorResponse("this booking is already canceled");
+
+        }
+
+
+        $time = new \DateTime($booking->session_date." ".$booking->time_from);
+        $diff = $time->diff(new \DateTime());
+        $minutes = ($diff->days * 24 * 60) +
+            ($diff->h * 60) + $diff->i;
+
+        if($minutes < (60*24))
+        {
+            return $this->messageHandler->getJsonNotFoundErrorResponse("You can not cancel this booking with remaining time less than 24 hours");
+
+        }
+        $doctor_id = $get_session->doctor_id;
+
+        $get_doctor = doctors_m::where("doctor_id",$doctor_id)->first();
+        $user = User::where("user_id",$booking->user_id)->first();
+        $doc = User::where("user_id",$get_doctor->user_id)->first();
+        $get_session->update([
+            "is_booked" => 0,
+        ]);
+        $booking->update([
+            "is_canceled" => 1
+
+        ]);
+
+
+        notification_m::create([
+                "to_user_id" => $get_doctor->user_id,
+                "to_user_type" => "doctor",
+                "not_type" => "cancel_session",
+                "not_title" => "Your Session with ".$user->username." at ".$booking->time_from." ".$booking->session_date." is canceled"
+            ]);
+
+
+            notification_m::create([
+                "to_user_id" => $booking->user_id,
+                "to_user_type" => "user",
+                "not_type" => "cancel_session",
+                "not_title" => "Your Session with Dr ".$booking->full_name." at ".$booking->time_from." ".$booking->session_date." is canceled"
+            ]);
+
+
+            $doc->notify((new CancelSession($doc,$booking->time_from,$booking->session_date)));
+        $user->notify((new CancelSession($user,$booking->time_from,$booking->session_date)));
+        return $this->messageHandler->postJsonSuccessResponse(Lang::get("general.added_successfully"),[]);
+
     }
 
 

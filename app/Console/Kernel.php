@@ -14,7 +14,10 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         'App\Console\Commands\NotifyUsersDaily',
-        'App\Console\Commands\NotifyDoctorsDaily'
+        'App\Console\Commands\NotifyDoctorsDaily',
+        'App\Console\Commands\NotifyUsersBeforeSession',
+        'App\Console\Commands\NotifyDoctorsBeforeSession'
+
 
     ];
 
@@ -26,9 +29,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        ///$schedule->command('doctors:notifyDaily')->dailyAt('23:59');
-        $schedule->command('users:notifyDaily')->everyMinute();
-        $schedule->command('doctors:notifyDaily')->everyMinute();
+        $schedule->command('users:BeforeDoctorSession')->everyMinute();
+        $schedule->command('users:BeforeUserSession')->everyMinute();
+        $schedule->command('users:notifyUsersDaily')->dailyAt('23:55');
+        $schedule->command('users:notifyDoctorsDaily')->dailyAt("23:55");
 
 
     }

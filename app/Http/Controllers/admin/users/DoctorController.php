@@ -50,7 +50,7 @@ class DoctorController extends adminBaseController
 
     public function getUser($user_id)
     {
-        $user_id   = intval(clean($user_id));
+        $user_id   = intval(($user_id));
         $cond       = [];
         $cond[]     = ["users.user_id","=",$user_id];
         $item_data  = User::get_users_dashboard(
@@ -76,7 +76,7 @@ class DoctorController extends adminBaseController
         if ($doctor_id != null)
         {
 
-            $doctor_id    = intval(clean($doctor_id));
+            $doctor_id    = intval(($doctor_id));
 
             $cond       = [];
             $cond[]     = ["doctors.doctor_id","=",$doctor_id];
@@ -116,11 +116,11 @@ class DoctorController extends adminBaseController
                     $height               = 0,
                     $photo_id_for_edit    = $img_id
                 );
-                $user_data["email"]     = clean($request["email"]);
+                $user_data["email"]     = ($request["email"]);
                 $user_data["password"]  = bcrypt($request["password"]);
                 $user_data["user_type"] = "doctor";
                 $user_data["is_active"] = 1;
-                $user_data["username"] = clean($request["username"]);
+                $user_data["username"] = ($request["username"]);
 
 
                 #region save slider images
@@ -165,7 +165,7 @@ class DoctorController extends adminBaseController
                         $user_data["password"] = $get_user->password;
                     }
 
-                    $check = doctors_m::find($doctor_id)->update(clean($request->all()));
+                    $check = doctors_m::find($doctor_id)->update(($request->all()));
                     $user_update= User::where('user_id',$user_id)->update($user_data);
 
 
@@ -188,7 +188,7 @@ class DoctorController extends adminBaseController
 
                     // insert
                     $request['user_id'] = $user->user_id;
-                    $check = doctors_m::create(clean($request->all()));
+                    $check = doctors_m::create(($request->all()));
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -207,11 +207,11 @@ class DoctorController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["doctor_id"] = $doctor_id;
-                    $inputs["job_title"] = clean(array_shift($input_data["job_title"]));
-                    $inputs["country"] = clean(array_shift($input_data["country"]));
-                    $inputs["full_name"] = clean(array_shift($input_data["full_name"]));
-                    $inputs["brief_bio"] = clean(array_shift($input_data["brief_bio"]));
-                    $inputs["specialties"] = clean(array_shift($input_data["specialties"]));
+                    $inputs["job_title"] = (array_shift($input_data["job_title"]));
+                    $inputs["country"] = (array_shift($input_data["country"]));
+                    $inputs["full_name"] = (array_shift($input_data["full_name"]));
+                    $inputs["brief_bio"] = (array_shift($input_data["brief_bio"]));
+                    $inputs["specialties"] = (array_shift($input_data["specialties"]));
                     $inputs["lang_id"] = $lang_item->lang_id;
 
                     $current_row = $this->data["item_data_translate"]->filter(function ($value, $key) use ($lang_item) {
@@ -269,9 +269,9 @@ class DoctorController extends adminBaseController
         $rules_itself                            = [];
         $attrs_names                             = [];
 
-        $full_name                             = clean($request->get("full_name"));
-        $job_title                              = clean($request->get("job_title"));
-        $country                              = clean($request->get("country"));
+        $full_name                             = ($request->get("full_name"));
+        $job_title                              = ($request->get("job_title"));
+        $country                              = ($request->get("country"));
         $img_id                                  = $request['doctor_img_file'];
 
 
@@ -282,7 +282,7 @@ class DoctorController extends adminBaseController
         $rules_values["password"]                      = $request["password"];
         $rules_itself["password"]                      = "confirmed";
 
-        $rules_values["password_confirmation"]         = clean($request->get("password_confirmation"));
+        $rules_values["password_confirmation"]         = ($request->get("password_confirmation"));
         $rules_itself["password_confirmation"]         ="required_with:password";
 
         $rules_values["doctor_img_file"]                  = $request['doctor_img_file'];
@@ -330,7 +330,7 @@ class DoctorController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         #region remove dependencies
 
@@ -343,7 +343,7 @@ class DoctorController extends adminBaseController
 
     public function getDoctorsSpecialites($doctor_id)
     {
-        $doctor_id   = intval(clean($doctor_id));
+        $doctor_id   = intval(($doctor_id));
         $cond       = [];
         $cond[]     = ["doctors_specialites.doctor_id","=",$doctor_id];
         $this->data['doctor_id']  = $doctor_id;
@@ -381,14 +381,14 @@ class DoctorController extends adminBaseController
         }
 
         $this->data["item_data"]                = "";
-        $doctor_id    = intval(clean($doctor_id));
+        $doctor_id    = intval(($doctor_id));
         $this->data['doctor_id'] = $doctor_id;
 
 
         if ($doc_spe_id != null)
         {
 
-            $doc_spe_id                   = intval(clean($doc_spe_id));
+            $doc_spe_id                   = intval(($doc_spe_id));
             $this->data["doc_spe_id"]     = $doc_spe_id;
 
             $cond       = [];
@@ -416,7 +416,7 @@ class DoctorController extends adminBaseController
                 {
 
                     $check      = doctors_specialites_m::find($doc_spe_id);
-                    $is_updated = $check->update(clean($request->all()));
+                    $is_updated = $check->update(($request->all()));
 
                     if ($is_updated == true)
                     {
@@ -435,7 +435,7 @@ class DoctorController extends adminBaseController
 
                     $request['doctor_id'] = $doctor_id;
                     // insert
-                    $check = doctors_specialites_m::create(clean($request->all()));
+                    $check = doctors_specialites_m::create(($request->all()));
 
                     if (is_object($check))
                     {
@@ -467,7 +467,7 @@ class DoctorController extends adminBaseController
 
     public function deleteDoctorSpecilites(Request $request,$doctor_id)
     {
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         #region remove dependencies
 

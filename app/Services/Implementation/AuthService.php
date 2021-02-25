@@ -5,9 +5,6 @@ namespace App\Services\Implementation;
 use App\Adapters\IUserAdapter;
 use App\Helpers\MessageHandleHelper;
 use App\helpers\utility;
-use App\Jobs\send_email;
-use App\Jobs\send_sms;
-use App\models\settings_m;
 use App\Notifications\mail\resetPassword;
 use App\Notifications\mail\sendActivationLink;
 use App\Notifications\mail\sendVerificationCode;
@@ -121,8 +118,7 @@ class AuthService implements IAuthService {
                 if($email_login || $username_login)
                 {
 
-                    $arr["verification_code"] = $verificationCode;
-                  // $user->notify((new sendVerificationCode($user,$arr)));
+                    $user->notify((new sendActivationLink($user)));
 
                     $json = [
                         'Status'        => 1,
@@ -289,7 +285,6 @@ class AuthService implements IAuthService {
 
     }
 
-
     function sendVerificationCode($data)
     {
 
@@ -364,7 +359,6 @@ class AuthService implements IAuthService {
 
     }
 
-
     public function passwordForget($data)
     {
 
@@ -436,12 +430,11 @@ class AuthService implements IAuthService {
 
     }
 
-
     function numberVerification($data){
 
-        $user_type      = isset($data["user_type"])?clean($data["user_type"]):"user";
-        $phone_code     = isset($data["phone_code"])?clean($data["phone_code"]):"20";
-        $field          = (isset($data["field"])?clean($data["field"]):"");
+        $user_type      = isset($data["user_type"])?($data["user_type"]):"user";
+        $phone_code     = isset($data["phone_code"])?($data["phone_code"]):"20";
+        $field          = (isset($data["field"])?($data["field"]):"");
         $field          = trim($field);
 
         $isEmail        = filter_var($field, FILTER_VALIDATE_EMAIL);
@@ -616,7 +609,6 @@ class AuthService implements IAuthService {
 
     }
 
-
     public function resetPasswordByEmail($data)
     {
 
@@ -708,17 +700,10 @@ class AuthService implements IAuthService {
 
         if(!is_object($user))
        {
-           $plan = $this->adapter->getPlan();
            $user_code          = md5("#!@!#!*&*(&" . "sponsor_btm" . "#!@!#!*&*(&" . time() . random_bytes(5));
-           $plan_expire_date         = Carbon::now()->addDay($plan->num_of_days);
-           $data['plan_expire_date'] = $plan_expire_date;
-           $data['offers_count']     = $plan->offers_number;
            $data['user_code']        = $user_code;
 
            $user = $this->adapter->createUser($data);
-
-           $this->adapter->generateUserSerial($user);
-           $this->adapter->generateReferralCode($user);
 
        }
 
@@ -753,7 +738,6 @@ class AuthService implements IAuthService {
 
     }
 
-
     function showSocialAuth()
     {
         return $this->messageHandler->getJsonSuccessResponse("", [
@@ -767,7 +751,6 @@ class AuthService implements IAuthService {
         $user->update([
             "is_active" => 1
         ]);
-        Auth::login($user);
         return Redirect::to("/");
     }
 

@@ -17,7 +17,7 @@ class DarkModeController extends adminBaseController
     {
 
         $dark_mode = $request->get('dark_mode','off');
-        $dark_mode = clean($dark_mode);
+        $dark_mode = ($dark_mode);
 
         session([
             'dark_mode' => $dark_mode

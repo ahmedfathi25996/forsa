@@ -40,7 +40,7 @@ class HomeController extends frontBaseController
         if($request->method() == "POST")
         {
 
-            $data = clean($request->all());
+            $data = $request->all();
 
             support_messages_m::create([
                 "msg_type" => "support",

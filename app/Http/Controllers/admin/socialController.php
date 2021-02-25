@@ -51,7 +51,7 @@ class socialController extends adminBaseController
         if ($social_list_id != null)
         {
 
-            $social_list_id    = intval(clean($social_list_id));
+            $social_list_id    = intval($social_list_id);
 
             $cond       = [];
             $cond[]     = ["social_list.social_list_id","=",$social_list_id];
@@ -92,7 +92,7 @@ class socialController extends adminBaseController
                 // update
                 if ($social_list_id != null) {
 
-                    $check = social_list_m::find($social_list_id)->update(clean($request->all()));
+                    $check = social_list_m::find($social_list_id)->update($request->all());
 
                     if ($check == true) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -106,7 +106,7 @@ class socialController extends adminBaseController
                 } else {
 
                     // insert
-                    $check = social_list_m::create(clean($request->all()));
+                    $check = social_list_m::create($request->all());
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -125,7 +125,7 @@ class socialController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["social_list_id"] = $social_list_id;
-                    $inputs["name"] = clean(array_shift($input_data["name"]));
+                    $inputs["name"] = array_shift($input_data["name"]);
 
 
                     $inputs["lang_id"] = $lang_item->lang_id;
@@ -185,8 +185,8 @@ class socialController extends adminBaseController
         $rules_itself                            = [];
         $attrs_names                             = [];
 
-        $social_name                             = clean($request->get("name"));
-        $social_url                              = clean($request->get("social_url"));
+        $social_name                             = ($request->get("name"));
+        $social_url                              = ($request->get("social_url"));
         $img_id                                  = $request['social_img_file'];
 
         $rules_values["social_url"]              = $request->get("social_url");
@@ -238,7 +238,7 @@ class socialController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         #region remove dependencies
 

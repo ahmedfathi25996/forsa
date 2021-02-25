@@ -44,7 +44,7 @@ class dashboardController extends adminBaseController
                 ]
             );
 
-            $request = clean($request->all());
+            $request = $request->all();
 
             $usersTokens = User::get_users_tokens($request["device_type"],$offset = 0,$limit = 10);
 

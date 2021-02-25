@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ValidationHelper;
 use App\Http\Controllers\api_controller;
 use App\Services\IAuthService;
-use App\Services\IBrandService;
 use App\Services\IDoctorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -144,10 +143,42 @@ class DoctorController extends api_controller
      return $this->service->listSchedule($request);
     }
 
-    public function getAllRatings()
+    public function getAllRatings(Request $request)
     {
         $user = Auth::user();
-        return $this->service->getAllRatings($user);
+        return $this->service->getAllRatings($user,$request);
+    }
+
+    public function startSession($session_id)
+    {
+        return $this->service->startSession($session_id);
+    }
+
+    public function joinSession($session_id,$channel_name,$token)
+    {
+        return $this->service->joinSession($session_id,$channel_name,$token);
+    }
+
+    public function updateSessionStatus(Request $request)
+    {
+        return $this->service->updateSessionStatus($request);
+    }
+
+    public function afterSessionActions(Request $request,$session_id)
+    {
+        return $this->service->afterSessionActions($request,$session_id);
+
+    }
+
+    public function getBookedDoctorSessionsHome(Request $request)
+    {
+        return $this->service->getBookedDoctorSessionsHome($request);
+
+    }
+
+    public function getDoctorWallet()
+    {
+        return $this->service->getDoctorWallet();
     }
 
 

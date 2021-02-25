@@ -41,25 +41,13 @@
                     <form id="save_form" action="{{url("admin/settings")}}" method="POST" enctype="multipart/form-data">
 
                         <div class="section-wrapper mg-t-20">
-                            <label class="section-title">التحكم في إعدادات السيستيم والتطبيق</label>
+                            <label class="section-title">التحكم في إعدادات السيستيم</label>
                             <p class="mg-b-20 mg-sm-b-40"></p>
 
                                 <div id="wizard3">
-                                    <h3> <i class="fa fa-tablet"></i> التطبيق </h3>
+                                    <h3> <i class="fa fa-tablet"></i> الاعدادات </h3>
                                     <section>
                                         @include("admin.subviews.settings.components.app_settings")
-                                    </section>
-                                    <h3> <i class="fa fa-money"></i> العملة الاساسية </h3>
-                                    <section>
-                                        @include("admin.subviews.settings.components.products_settings")
-                                    </section>
-                                    <h3> <i class="fa fa-envelope"></i> الرسائل والايميلات  </h3>
-                                    <section>
-                                        @include("admin.subviews.settings.components.sms_emails_settings")
-                                    </section>
-                                    <h3> <i class="fa fa-bell"></i> الإشعارات </h3>
-                                    <section>
-                                        @include("admin.subviews.settings.components.push_notification_settings")
                                     </section>
                                 </div>
                         </div><!-- section-wrapper -->

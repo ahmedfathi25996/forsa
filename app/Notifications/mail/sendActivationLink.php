@@ -40,7 +40,7 @@ class sendActivationLink extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Activate Your Account')
-            ->greeting("Welcome ".$this->user->full_name)
+            ->greeting("Welcome ".$this->user->username)
             ->action("Activate Your Account",$full_url);
 
     }

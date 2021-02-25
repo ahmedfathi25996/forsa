@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends api_controller
 {
@@ -129,9 +130,6 @@ class AuthController extends api_controller
         return $this->service->sendVerificationCode($data);
     }
 
-
-
-
     public function passwordForget(Request $request)
     {
 
@@ -157,11 +155,6 @@ class AuthController extends api_controller
         return $this->service->passwordForget($data);
 
     }
-
-
-
-
-
 
     public function updatePushToken(Request $request)
     {
@@ -189,7 +182,6 @@ class AuthController extends api_controller
         return $this->service->updatePushToken($data,$user);
 
     }
-
 
     public function numberVerification(Request $request)
     {
@@ -310,10 +302,6 @@ class AuthController extends api_controller
         return $this->service->logout($request);
     }
 
-
-
-
-
     public function sendVerification(Request $request)
     {
         $user = Auth::user();
@@ -338,34 +326,21 @@ class AuthController extends api_controller
         return $this->service->checkVerification($data, Auth::user());
     }
 
-
-    public function socialLogin(Request $request)
+    public function socialLogin($social)
     {
-        $data = $request->all();
+        return Socialite::driver($social)->redirect();
+    }
 
-        $messages = [
-            'email.required'            => Lang::get("auth.require_email"),
-            'full_name.required'        => Lang::get("auth.require_username"),
-            'user_type.required'        => Lang::get("auth.require_user_type"),
-            'user_type.in'              => Lang::get("auth.in_user_type"),
-        ];
-
-        $validator = $this->validator->getValidationErrorsWithRequest(
-            $request->all(),
-            [
-                'social_id'     => 'required',
-                'user_provider' => 'required|in:facebook,twitter,apple,google',
-                'full_name'     => 'required',
-                'user_type'     => 'required|in:user'
-
-            ],
-            $messages );
-
-        if ($validator !== true)
-            return $this->getJsonValidationErrorResponse("", $validator);
-
-
-        return $this->service->socialLogin($data);
+    public function handleProviderCallback($social)
+    {
+        $userSocial = Socialite::driver($social)->user();
+        $user = User::where(['email' => $userSocial->getEmail()])->first();
+        if($user){
+            Auth::login($user);
+            return redirect()->action('HomeController@index');
+        }else{
+            return view('auth.register',['name' => $userSocial->getName(), 'email' => $userSocial->getEmail()]);
+        }
     }
 
     public function showSocialAuth()

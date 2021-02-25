@@ -15,7 +15,7 @@ class changeMenuController extends adminBaseController
     public function index($menu_display)
     {
 
-        $menu_display = clean($menu_display);
+        $menu_display = ($menu_display);
 
         session([
             'menu_display' => $menu_display

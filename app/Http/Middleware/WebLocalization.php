@@ -19,7 +19,7 @@ class WebLocalization
         if(\Illuminate\Support\Facades\Session::has('locale'))
         {
             $get_locale = \Illuminate\Support\Facades\Session::get('locale');
-            $get_locale = clean($get_locale);
+            $get_locale = ($get_locale);
             if(!empty($get_locale) && in_array($get_locale, ["ar", "en"]))
             {
                 $locale = $get_locale;
@@ -39,7 +39,7 @@ class WebLocalization
         if(\Illuminate\Support\Facades\Session::has('menu_display'))
         {
             $get_menu_display = \Illuminate\Support\Facades\Session::get('menu_display');
-            $get_menu_display = clean($get_menu_display);
+            $get_menu_display = ($get_menu_display);
             if(!empty($get_menu_display) && in_array($get_menu_display, ["navbar", "sidebar"]))
             {
                 $menu_display = $get_menu_display;

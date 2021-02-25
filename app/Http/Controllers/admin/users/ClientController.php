@@ -51,7 +51,7 @@ class ClientController extends adminBaseController
 
     public function getClient($user_id)
     {
-        $user_id   = intval(clean($user_id));
+        $user_id   = intval(($user_id));
         $cond       = [];
         $cond[]     = ["users.user_id","=",$user_id];
         $item_data  = User::get_users_dashboard(
@@ -69,7 +69,7 @@ class ClientController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         $this->general_remove_item($request,'App\User');
     }

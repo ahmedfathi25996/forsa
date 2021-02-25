@@ -293,7 +293,7 @@ trait imagesTrait
 
     public function edit_slider_item(Request $request){
 
-        $img_id     = intval(clean($request->get("img_id")));
+        $img_id     = intval(($request->get("img_id")));
         $att_obj    = attachments_m::find($img_id);
         $output     = [];
 

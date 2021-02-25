@@ -17,6 +17,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+    #region VOIP
+    Route::get('session/{session_id}/join/{channel_name}/{token}','Api\DoctorController@joinSession');
+    Route::get("update/session/status",'Api\DoctorController@updateSessionStatus');
+    Route::get('update/after/session/{session_id}/actions','Api\DoctorController@afterSessionActions');
+    #endregion
 
 
 Route::group([ 'middleware' => ['auth:api','APILocalization']], function () {
@@ -44,13 +49,15 @@ Route::group([ 'middleware' => ['auth:api','APILocalization']], function () {
     #endregion
     Route::post("/rate/doctor/{doctor_id}/session/{session_id}",'Api\UserController@rateDoctor');
 
-    #region profile
+    #region user profile
 
     Route::get('profile', 'Api\UserController@getProfile');
     Route::post('profile/image', 'Api\UserController@updateProfileImage');
     Route::post('profile/name', 'Api\UserController@updateProfileName');
     Route::put('change/password', 'Api\UserController@changePassword');
     Route::put('user/update/profile','Api\UserController@updateProfile');
+    #endregion
+
 
     #region doctor profile
     Route::put("doctor/update/profile",'Api\DoctorController@updateProfile');
@@ -58,49 +65,25 @@ Route::group([ 'middleware' => ['auth:api','APILocalization']], function () {
     Route::post("doctor/update/bio",'Api\DoctorController@updateDoctorBio');
     Route::get("doctor/ratings/{session_id}",'Api\DoctorController@getDoctorRatings');
     Route::get("doctors/rate",'Api\DoctorController@getAllRatings');
-    #endregion
+    Route::get("doctor/home/booked/schedule",'Api\DoctorController@getBookedDoctorSessionsHome');
+    Route::get("booking/cancel/{session_id}",'Api\UserController@cancelBooking');
+    Route::get("doctor/wallet",'Api\DoctorController@getDoctorWallet');
 
     #endregion
 
     Route::get("notifications",'Api\UserController@getNofifications');
     Route::get("list/schedule",'Api\DoctorController@listSchedule');
+    Route::get("start/session/{session_id}",'Api\DoctorController@startSession');
 
-    // update mobile phone
-    Route::post('change/mobile', 'Api\UserController@changeMobile');
-    Route::put('change/mobile', 'Api\UserController@checkTempVerificationCode');
 
-    // update email
-    Route::post('change/email', 'Api\UserController@changeEmail');
-    Route::put('change/email', 'Api\UserController@checkEmailTempVerificationCode');
-
-    //redeem money
-    Route::get('redeem/rules','Api\UserController@getRedeemRules');
-    Route::post('redeem/money','Api\UserController@redeemMoney');
-    Route::get('user/wallet','Api\UserController@getUserWallet');
-
-    //user orders
-    Route::get('user/orders','Api\UserController@userOrders');
 
     //user notifications
     Route::get('user/notifications','Api\UserController@userNotifications');
 
-
-    #region video call
-    Route::get("sessions/{session_id}",'Api\UserController@session');
-    Route::get('video/{channel_name}/{appid}/{token}','Api\UserController@join_video');
-    #endregion
-
-    #endregion
-
-    #region offers
-    Route::post('offer/{offer_id}/order','Api\OfferController@useOffer');
     #endregion
 
 
-    #region plans
-    Route::get('plans','Api\SettingController@getPlans');
-    Route::get('plans/{plan_id}','Api\SettingController@getPlan');
-    #endregion
+
 });
 
 
@@ -110,6 +93,9 @@ Route::group([ 'middleware' => ['APILocalization']], function () {
     Route::post('login', 'Api\AuthController@login');
     Route::post('verification', 'Api\AuthController@numberVerification');
     Route::post('social/login','Api\AuthController@socialLogin');
+
+    Route::get('/login/{social}','Api\AuthController@socialLogin')->where('social','twitter|facebook|linkedin|google|github|bitbucket');
+    Route::get('/login/{social}/callback','Api\AuthController@handleProviderCallback')->where('social','twitter|facebook|linkedin|google|github|bitbucket');
 
 });
 
@@ -158,48 +144,9 @@ Route::group([ 'middleware' => ['APILocalization','shouldUseApi']], function () 
     #endregion
 
 
-
-    #region brands
-    //home
-    Route::get('brands','Api\BrandController@getBrands');
-
-
-    Route::get('list/brands','Api\BrandController@listAllBrands');
-    Route::get('brands/featured','Api\BrandController@getFeatureBrands');
-    Route::get('brands/{brand_id}','Api\BrandController@getBrand');
-    Route::get('categories/{cat_id}/brands','Api\BrandController@getCategoryBrands');
-    #endregion
-
-
-    #region offers
-    //home
-    Route::get('offers','Api\OfferController@getOffers');
-
-
-    Route::get('list/offers','Api\OfferController@listAllOffers');
-    Route::get('hot/offers','Api\OfferController@getHotOffers');
-    Route::get('offers/{offer_id}','Api\OfferController@getSingleOffer');
-    Route::get('nearby/offers','Api\OfferController@getNearByOffers');
-    Route::post('search/offers','Api\OfferController@searchOffers');
-
-    #endregion
-
-
-    #region custom home screen
-
-    Route::get('home','Api\HomeController@getHome');
-
-    #endregion
-
-
-    #region check show social
+    #region show social
 
     Route::get('show/social/auth','Api\AuthController@showSocialAuth');
-
-    #endregion
-
-    #region cities and districts
-    Route::get('list/cities', 'Api\SettingController@cityDistrict');
 
     #endregion
 

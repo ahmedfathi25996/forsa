@@ -2,10 +2,7 @@
 
 namespace App\Adapters\Implementation;
 
-use App\Adapters\IBrandAdapter;
 use App\Adapters\IDoctorAdapter;
-use App\models\branches\offers\offer_m;
-use App\models\brands\brand_m;
 use App\models\category\category_m;
 use App\models\doctors\certificates\certificates_m;
 use App\models\doctors\doctors_m;
@@ -16,13 +13,13 @@ use Carbon\Carbon;
 class DoctorAdapter implements IDoctorAdapter
 {
 
-    function listAllDoctors($cond)
+    function listAllDoctors($cond,$limit)
     {
 
         $result = doctors_m::listAllDoctors(
             $additional_and_wheres  = $cond, $free_conditions      = "",
-            $order_by_col           = "", $order_by_type        = "",
-            $limit =0                 , $offset =0    ,
+            $order_by_col           = "rating", $order_by_type        = "desc",
+            $limit                  , $offset =0    ,
             $paginate               = 12
         );
 

@@ -29,8 +29,8 @@ class supportMessagesController extends adminBaseController
         $this->data["request_data"] = (object)$request->all();
 
         $cond = [];
-        $from = clean($request->get('from'));
-        $to   = clean($request->get('to'));
+        $from = $request->get('from');
+        $to   = ($request->get('to'));
         if(isset($from) && !empty($from))
         {
             $cond[]     = ["support_messages.created_at",">=",$from];

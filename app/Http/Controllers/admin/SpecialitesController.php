@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\adminBaseController;
-use App\models\days\days_m;
-use App\models\days\days_translate_m;
 use App\models\specialites\specialites_translate_m;
 use App\models\specialites\specialites_m;
 use Illuminate\Http\Request;
@@ -52,7 +50,7 @@ class SpecialitesController extends adminBaseController
         if ($spe_id != null)
         {
 
-            $spe_id    = intval(clean($spe_id));
+            $spe_id    = intval(($spe_id));
 
             $cond       = [];
             $cond[]     = ["specialites.spe_id","=",$spe_id];
@@ -79,7 +77,7 @@ class SpecialitesController extends adminBaseController
                 // update
                 if ($spe_id != null) {
 
-                    $check = specialites_m::find($spe_id)->update(clean($request->all()));
+                    $check = specialites_m::find($spe_id)->update(($request->all()));
 
                     if ($check == true) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -93,7 +91,7 @@ class SpecialitesController extends adminBaseController
                 } else {
 
                     // insert
-                    $check = specialites_m::create(clean($request->all()));
+                    $check = specialites_m::create(($request->all()));
 
                     if (is_object($check)) {
                         $this->data["success"] = "<div class='alert alert-success'> تم الحفظ بنجاح </div>";
@@ -115,7 +113,7 @@ class SpecialitesController extends adminBaseController
                 foreach ($this->data["all_langs"] as $lang_key => $lang_item) {
                     $inputs = [];
                     $inputs["spe_id"]   = $spe_id;
-                    $inputs["title"] = clean(array_shift($input_data["title"]));
+                    $inputs["title"] = (array_shift($input_data["title"]));
                     $inputs["lang_id"]  = $lang_item->lang_id;
 
                     $current_row = $this->data["item_data_translate"]->filter(function ($value, $key) use ($lang_item) {
@@ -193,7 +191,7 @@ class SpecialitesController extends adminBaseController
                 $translate_row_id   = $current_row->first()->id;
             }
 
-            $rules_values["title_$key"]              = clean($request->get("title")[$key]);
+            $rules_values["title_$key"]              = ($request->get("title")[$key]);
             $rules_itself["title_$key"]              = "required|unique:specialites_translate,title,".$translate_row_id.",id,deleted_at,NULL";
 
             $attrs_names["title_$key.required"]      = "الإسم في ".$lang_item->lang_text." مطلوب إدخالة ";
@@ -209,7 +207,7 @@ class SpecialitesController extends adminBaseController
 
     public function delete(Request $request){
 
-        $item_id        = intval(clean($request->get("item_id",0)));
+        $item_id        = intval(($request->get("item_id",0)));
 
         #region remove dependencies
 

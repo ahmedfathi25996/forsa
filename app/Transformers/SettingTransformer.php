@@ -130,60 +130,6 @@ class SettingTransformer extends Transformer
     #endregion
 
 
-    #region plans
-    public function transformAllPlans($plans)
-    {
-        $allData = [];
-        $user = Auth::user();
-        foreach ($plans as $plan){
-            $item = [];
-
-            $item["plan_id"]     = isset($plan["plan_id"])?intval($plan["plan_id"]):0;
-            $item['plan_name']  = isset($plan['plan_name'])?$plan['plan_name']:'';
-            $item["plan_description"]   = isset($plan["plan_description"])?$plan["plan_description"]:'';
-            $item["price"]  = isset($plan["price"])?$plan["price"]:0;
-            $item["num_of_days"]  = isset($plan["num_of_days"])?$plan["num_of_days"]:0;
-            $item["offers_number"]  = isset($plan["offers_number"])?$plan["offers_number"]:0;
-            $item['plan_type']   =  isset($plan["plan_type"])?$plan["plan_type"]:"";
-            $item['is_user_plan'] = "";
-            if($user->plan_id == $plan['plan_id'])
-            {
-                $item['is_user_plan'] = true;
-            }else{
-                $item['is_user_plan'] = false;
-
-            }
-            $item['plan_image']  =url("public/images/no_image.png");
-            if(!empty($plan["plan_image_path"]) && $plan["plan_image_path"] != "T")
-            {
-                $item['plan_image'] = isset($plan["plan_image_path"])?url($plan["plan_image_path"]):'';
-            }
-            $allData[] = $item;
-        }
-
-        return array_values($allData);
-    }
-
-    public function transformSinglePlan($plan)
-    {
-
-        $data = [];
-
-        $data['plan_id']     = isset($plan["plan_id"])?intval($plan["plan_id"]):0;
-        $data['plan_name']   = isset($plan["plan_name"])?$plan["plan_name"]:"";
-        $data['plan_description']   = isset($plan["plan_description"])?$plan["plan_description"]:"";
-        $data['price']   = isset($plan["price"])?$plan["price"]:0;
-        $data['num_of_days']         = isset($plan["num_of_days"])?$plan["num_of_days"]:0;
-        $data['offers_number']       = isset($plan["offers_number"])?$plan["offers_number"]:0;
-        $data['plan_image']  =url("public/images/no_image.png");
-        if(!empty($plan['plan_image_path']) && $plan['plan_image_path'] != "T")
-        {
-            $data['plan_image'] = isset($plan['plan_image_path'])?url($plan['plan_image_path']):'';
-        }
-
-        return $data;
-    }
-    #endregion
 
 
     #region languages

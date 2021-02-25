@@ -73,7 +73,7 @@ class SettingController extends api_controller
     public function getCategories(Request $request)
     {
 
-        $request = clean($request->all());
+        $request = ($request->all());
 
         return $this->service->getCategories($request);
     }
