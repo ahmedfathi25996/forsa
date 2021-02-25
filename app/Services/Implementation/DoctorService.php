@@ -408,9 +408,12 @@ class DoctorService implements IDoctorService {
         return $this->messageHandler->getJsonSuccessResponse("", $get_ratings);
     }
 
-    public function joinSession($session_id,$channel_name,$token)
+    public function joinSession($session_id)
     {
         $appid = "0e03caa49a7c4594b60ad8178b1d9880";
+        $booking = booking_m::where("session_id",$session_id)->first();
+        $channel_name = $booking->channel_name;
+        $token = $booking->session_token;
         return view("front.video",compact('token','channel_name','appid','session_id'));
 
     }
@@ -479,11 +482,6 @@ class DoctorService implements IDoctorService {
         $time_to = $get_session->time_to;
         $time = strtotime($session_date." ".$time_to);
         $token = RtcTokenBuilder::buildTokenWithUid($appid,'5df0bc7ecb1e4f0686f9c3f154148167',$channel_name,null,1,$time);
-
-        while (strpos($token, '/') !== false) {
-            $token = RtcTokenBuilder::buildTokenWithUid($appid,'5df0bc7ecb1e4f0686f9c3f154148167',$channel_name,null,1,$time);
-        }
-
         #endregion
 
 
@@ -500,9 +498,13 @@ class DoctorService implements IDoctorService {
             "not_title" => "Your Doctor Started The Session ".$session_date." ".$time_from." please join him"
         ]);
         return $this->messageHandler->getJsonSuccessResponse("", [
+            "url" => url("/api/session/$session_id/join?channel_name=$booking->channel_name&session_token=$booking->session_token")
+        ]);
+       /*
+        return $this->messageHandler->getJsonSuccessResponse("", [
             "url" => url("/api/session/$session_id/join/$booking->channel_name/$booking->session_token")
         ]);
-
+*/
        // return redirect("/api/session/join/$channel_name/$token");
 
 

@@ -154,9 +154,9 @@ class DoctorController extends api_controller
         return $this->service->startSession($session_id);
     }
 
-    public function joinSession($session_id,$channel_name,$token)
+    public function joinSession($session_id)
     {
-        return $this->service->joinSession($session_id,$channel_name,$token);
+        return $this->service->joinSession($session_id);
     }
 
     public function updateSessionStatus(Request $request)

@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
     #region VOIP
-    Route::get('session/{session_id}/join/{channel_name}/{token}','Api\DoctorController@joinSession');
+    Route::get('session/{session_id}/join','Api\DoctorController@joinSession');
     Route::get("update/session/status",'Api\DoctorController@updateSessionStatus');
     Route::get('update/after/session/{session_id}/actions','Api\DoctorController@afterSessionActions');
     #endregion
