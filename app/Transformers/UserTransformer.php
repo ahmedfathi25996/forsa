@@ -88,6 +88,8 @@ class UserTransformer extends Transformer
             $data['user_rated_count'] = $count?$count:0;
 
             $data['sessions_count']    = $get_doctor->sessions_count?$get_doctor->sessions_count:0;
+            $data['is_available']    = $get_doctor->is_available?$get_doctor->is_available:0;
+
 
 
         }
@@ -399,6 +401,11 @@ class UserTransformer extends Transformer
             $item['rate']          = isset($rate['rate'])?number_format($rate['rate'],2):0;
             $item['message']            = isset($rate['message'])?$rate['message']:"";
             $item["username"]           = isset($rate["username"])?$rate["username"]:'';
+            $item['image']          =url("public/images/no_image.png");
+            if(!empty($rate['user_image_path']))
+            {
+                $item['image'] = isset($rate['user_image_path'])?url($rate['user_image_path']):'';
+            }
             $now = time();
             $your_date = strtotime($rate['created_at']);
             $datediff = $now - $your_date;

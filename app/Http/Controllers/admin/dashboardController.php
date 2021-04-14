@@ -4,9 +4,12 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\adminBaseController;
 use App\Jobs\send_push;
+use App\models\doctors\doctors_sessions_m;
 use App\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\Request;
+
 
 class dashboardController extends adminBaseController
 {
@@ -21,6 +24,12 @@ class dashboardController extends adminBaseController
     public function index()
     {
         $this->setMetaTitle("لوحة التحكم");
+
+        $this->data['users_count'] = User::where("user_type","user")->whereNull("deleted_at")->count();
+        $this->data['doctors_count'] = User::where("user_type","doctor")->whereNull("deleted_at")->count();
+        $this->data['booked_sessions_count'] = doctors_sessions_m::where("is_booked",1)->whereNull("deleted_at")->count();
+        $this->data['finished_sessions_count'] = doctors_sessions_m::where("is_done",1)->whereNull("deleted_at")->count();
+
 
 
         return view("admin.subviews.index", $this->data);

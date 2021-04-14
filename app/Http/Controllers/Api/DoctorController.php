@@ -154,9 +154,9 @@ class DoctorController extends api_controller
         return $this->service->startSession($session_id);
     }
 
-    public function joinSession($session_id,$channel_name,$token)
+    public function joinSession($session_id)
     {
-        return $this->service->joinSession($session_id,$channel_name,$token);
+        return $this->service->joinSession($session_id);
     }
 
     public function updateSessionStatus(Request $request)
@@ -179,6 +179,32 @@ class DoctorController extends api_controller
     public function getDoctorWallet()
     {
         return $this->service->getDoctorWallet();
+    }
+
+    public function doctorAvailability(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->all();
+
+        $messages = [
+
+        ];
+
+        $validator = $this->validator->getValidationErrorsWithRequest(
+            $data,
+            [
+                'is_available'      => 'required|numeric',
+
+            ],
+            $messages
+        );
+
+
+        if ($validator !== true)
+            return $this->getJsonValidationErrorResponse("", $validator);
+
+
+        return $this->service->doctorAvailability($request, $user);
     }
 
 

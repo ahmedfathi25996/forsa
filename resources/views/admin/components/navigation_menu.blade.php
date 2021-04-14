@@ -48,6 +48,14 @@
                 </a>
             </li>
 
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{url("/admin/team")}}">
+                    <span>فريق العمل</span>
+                </a>
+            </li>
+
+
         </ul>
     </div><!-- container -->
 </div><!-- slim-navbar -->

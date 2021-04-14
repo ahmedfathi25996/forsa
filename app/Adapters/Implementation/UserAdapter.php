@@ -27,11 +27,10 @@ class UserAdapter implements IUserAdapter {
         return User::where($cond)->first();
     }
 
-    function getUserTypeEmailOrTemp($field, $user_type)
+    function getUserTypeEmailOrTemp($field)
     {
 
         return User::where([
-            'user_type' => $user_type,
             'user_provider' => "default"
         ])
             ->where(function($query) use($field)
@@ -42,11 +41,10 @@ class UserAdapter implements IUserAdapter {
             ->get()->first();
     }
 
-    function getUserTypeNumberOrTemp($field, $user_type)
+    function getUserTypeNumberOrTemp($field)
     {
 
         return User::where([
-            'user_type' => $user_type,
             'user_provider' => "default"
         ])
             ->where(function($query) use($field)

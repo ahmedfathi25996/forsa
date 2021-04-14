@@ -7,6 +7,7 @@ use App\models\category\category_m;
 use App\models\doctors\certificates\certificates_m;
 use App\models\doctors\doctors_m;
 use App\models\doctors\doctors_sessions_m;
+use App\models\doctors\doctors_translate_m;
 use App\User;
 use Carbon\Carbon;
 
@@ -85,5 +86,34 @@ class DoctorAdapter implements IDoctorAdapter
             "temp_certificates_ids" => $data['certificates_ids']
         ]);
 
+    }
+
+
+    public function updateDoctorTranslatedData($request,$data,$doctor_id)
+    {
+        if($request->header("Accept-Language") == "ar")
+        {
+            $doctor =  doctors_translate_m::where('doctor_id',$doctor_id)->where("lang_id",2)->first();
+
+        }else{
+            $doctor =  doctors_translate_m::where('doctor_id',$doctor_id)->where("lang_id",1)->first();
+
+        }
+
+
+
+        return $doctor->update([
+            "job_title" => $data['job_title'],
+            "brief_bio" => $data['brief_bio']
+        ]);
+    }
+
+    public function doctorAvailability($status,$user_id)
+    {
+        $doctor =  doctors_m::where('user_id',$user_id)->first();
+        return $doctor->update([
+            "is_available" => $status
+
+        ]);
     }
 }

@@ -274,7 +274,7 @@ class DoctorService implements IDoctorService {
             return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("auth.user_not_exist"));
         }
         $cond[] = ["doctors.doctor_id","=",$doctor_id];
-        $data = $this->adapter->listAllDoctors($cond);
+        $data = $this->adapter->listAllDoctors($cond,0);
         $data = $data[0];
         $certificates_slider  =  $this->adapter->getCertificateSlider($data);
         $get_user = $this->transform->transformDoctorBio($data,$certificates_slider);
@@ -321,8 +321,15 @@ class DoctorService implements IDoctorService {
 
         $request["certificates_ids"] = json_encode($request["certificates_ids"]);
 
+        $translated_date['job_title'] = $request['job_title'];
+        $translated_date['brief_bio'] = $request['brief_bio'];
+
 
         $this->adapter->updateDoctorBio($request->all(),$doctor_id);
+
+        $this->adapter->updateDoctorTranslatedData($request,$translated_date,$doctor_id);
+
+
 
 
         $msg = Lang::get("Updated Successfully and waiting for approval");
@@ -408,9 +415,12 @@ class DoctorService implements IDoctorService {
         return $this->messageHandler->getJsonSuccessResponse("", $get_ratings);
     }
 
-    public function joinSession($session_id,$channel_name,$token)
+    public function joinSession($session_id)
     {
         $appid = "0e03caa49a7c4594b60ad8178b1d9880";
+        $booking = booking_m::where("session_id",$session_id)->first();
+        $channel_name = $booking->channel_name;
+        $token = $booking->session_token;
         return view("front.video",compact('token','channel_name','appid','session_id'));
 
     }
@@ -479,11 +489,6 @@ class DoctorService implements IDoctorService {
         $time_to = $get_session->time_to;
         $time = strtotime($session_date." ".$time_to);
         $token = RtcTokenBuilder::buildTokenWithUid($appid,'5df0bc7ecb1e4f0686f9c3f154148167',$channel_name,null,1,$time);
-
-        while (strpos($token, '/') !== false) {
-            $token = RtcTokenBuilder::buildTokenWithUid($appid,'5df0bc7ecb1e4f0686f9c3f154148167',$channel_name,null,1,$time);
-        }
-
         #endregion
 
 
@@ -500,9 +505,13 @@ class DoctorService implements IDoctorService {
             "not_title" => "Your Doctor Started The Session ".$session_date." ".$time_from." please join him"
         ]);
         return $this->messageHandler->getJsonSuccessResponse("", [
+            "url" => url("/api/session/$session_id/join?channel_name=$booking->channel_name&session_token=$booking->session_token")
+        ]);
+       /*
+        return $this->messageHandler->getJsonSuccessResponse("", [
             "url" => url("/api/session/$session_id/join/$booking->channel_name/$booking->session_token")
         ]);
-
+*/
        // return redirect("/api/session/join/$channel_name/$token");
 
 
@@ -612,6 +621,23 @@ class DoctorService implements IDoctorService {
         );
         $get_ratings = $this->transform->transformDoctorWallet($wallet);
         return $this->messageHandler->getJsonSuccessResponse("", $get_ratings);
+
+    }
+
+    public function doctorAvailability($request,$user)
+    {
+        $user_id = $user->user_id;
+        if(Auth::user()->user_type != 'doctor')
+        {
+            return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("auth.not_allowed"));
+
+        }
+        $status = $request['is_available'];
+        $this->adapter->doctorAvailability($status,$user_id);
+
+        $msg = Lang::get("general.updated_successfully");
+
+        return $this->messageHandler->postJsonSuccessResponse($msg,[]);
 
     }
 

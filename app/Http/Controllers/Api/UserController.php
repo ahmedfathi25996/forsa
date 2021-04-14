@@ -92,8 +92,6 @@ class UserController extends api_controller
         $user = Auth::user();
 
         $messages = [
-            'user_type.required'        => Lang::get("auth.require_user_type"),
-            'user_type.in'              => Lang::get("auth.in_user_type"),
             'mobile_number.required'    => Lang::get("auth.require_mobile_number"),
             'mobile_number.numeric'     => Lang::get("auth.numeric_mobile_number"),
             'mobile_number.unique'      => Lang::get("general.unique_mobile_number"),
@@ -103,7 +101,6 @@ class UserController extends api_controller
         $validator = $this->validator->getValidationErrorsWithRequest(
             $request->all(),
             [
-                'user_type'     => 'required|in:user',
                 'mobile_number' => 'required|numeric|digits:11',
             ],
             $messages
@@ -127,13 +124,10 @@ class UserController extends api_controller
             $request->all(),
             [
                 'number_verify' => 'required|numeric',
-                'user_type'     => 'required|in:user',
             ],
             [
                 'number_verify.required'    => Lang::get('auth.require_number_verify'),
                 'number_verify.numeric'     => Lang::get('auth.numeric_number_verify'),
-                'user_type.required'        => Lang::get("auth.require_user_type"),
-                'user_type.in'              => Lang::get("auth.in_user_type"),
             ]
         );
 
@@ -151,8 +145,6 @@ class UserController extends api_controller
         $user = Auth::user();
 
         $messages = [
-            'user_type.required'        => Lang::get("auth.require_user_type"),
-            'user_type.in'              => Lang::get("auth.in_user_type"),
             'email.required'            => Lang::get("auth.require_email"),
             'email.email'               => Lang::get("auth.email_email"),
         ];
@@ -160,7 +152,6 @@ class UserController extends api_controller
         $validator = $this->validator->getValidationErrorsWithRequest(
             $request->all(),
             [
-                'user_type'     => 'required|in:user',
                 'email'         => 'required|email',
             ],
             $messages
@@ -184,13 +175,10 @@ class UserController extends api_controller
             $request->all(),
             [
                 'number_verify' => 'required|numeric',
-                'user_type'     => 'required|in:user',
             ],
             [
                 'number_verify.required'    => Lang::get('auth.require_number_verify'),
                 'number_verify.numeric'     => Lang::get('auth.numeric_number_verify'),
-                'user_type.required'        => Lang::get("auth.require_user_type"),
-                'user_type.in'              => Lang::get("auth.in_user_type"),
             ]
         );
 

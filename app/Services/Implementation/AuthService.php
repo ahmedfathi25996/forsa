@@ -34,7 +34,6 @@ class AuthService implements IAuthService {
 
     function login($data)
     {
-        $data['user_type']     = $data["user_type"] ?? "user";
 
         $field      = trim($data['field']);
         $isEmail    = filter_var($data['field'], FILTER_VALIDATE_EMAIL);
@@ -45,7 +44,6 @@ class AuthService implements IAuthService {
 
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"     => $data['user_type'],
                     "email"         => $data['email'],
                     "user_provider" => "default"
                 ]
@@ -62,7 +60,6 @@ class AuthService implements IAuthService {
 
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"             => $data['user_type'],
                     "username"         =>  $data['username'] ,
                     "user_provider"         => "default"
                 ]
@@ -88,7 +85,6 @@ class AuthService implements IAuthService {
             $username_login = Auth::attempt([
                 'username' => $data['username'],
                 'password'      => $data['password'],
-                'user_type'     => $data['user_type'],
                 'user_provider' => 'default'
             ]);
         }
@@ -97,7 +93,6 @@ class AuthService implements IAuthService {
             $email_login = Auth::attempt([
                 'email'         => $data['email'],
                 'password'      => $data['password'],
-                'user_type'     => $data['user_type'],
                 'user_provider' => 'default'
             ]);
         }
@@ -288,17 +283,15 @@ class AuthService implements IAuthService {
     function sendVerificationCode($data)
     {
 
-        $data['user_type']     = isset($data["user_type"])?$data["user_type"]:"user";
 
         $field      = trim($data['field']);//  may be mobile or email
-        $user_type  = isset($data["user_type"])?$data["user_type"]:"user";
         $phone_code = (isset($data["phone_code"])?$data["phone_code"]:"20");
 
         $isEmail = filter_var($field, FILTER_VALIDATE_EMAIL);
 
         if ($isEmail)
         {
-            $user = $this->adapter->getUserTypeEmailOrTemp($field, $user_type);
+            $user = $this->adapter->getUserTypeEmailOrTemp($field);
 
             if (!$user)
                 return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("auth.user_not_exist"));
@@ -319,7 +312,7 @@ class AuthService implements IAuthService {
 
             #endregion
 
-            $user = $this->adapter->getUserTypeNumberOrTemp($field, $user_type);
+            $user = $this->adapter->getUserTypeNumberOrTemp($field);
 
             if (!$user)
                 return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("auth.user_not_exist"));
@@ -364,7 +357,6 @@ class AuthService implements IAuthService {
 
         $field = trim($data['field']);//  may be mobile or email
 
-        $user_type      = isset($data["user_type"])?$data["user_type"]:"user";
         $isEmail        = filter_var($field, FILTER_VALIDATE_EMAIL);
 
         if($isEmail)
@@ -372,7 +364,6 @@ class AuthService implements IAuthService {
             $data['email']  = $field;
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"     => $user_type,
                     "email"         => $data['email'],
                     "user_provider" => "default"
                 ]
@@ -396,7 +387,6 @@ class AuthService implements IAuthService {
 
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"             => $user_type,
                     "mobile_number"         => $data['number'],
                     "user_provider"         => "default"
                 ]
@@ -432,7 +422,6 @@ class AuthService implements IAuthService {
 
     function numberVerification($data){
 
-        $user_type      = isset($data["user_type"])?($data["user_type"]):"user";
         $phone_code     = isset($data["phone_code"])?($data["phone_code"]):"20";
         $field          = (isset($data["field"])?($data["field"]):"");
         $field          = trim($field);
@@ -444,7 +433,6 @@ class AuthService implements IAuthService {
         {
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"             => $user_type,
                     "email"                 => $field,
                     "user_provider"         => "default"
                 ]
@@ -471,7 +459,6 @@ class AuthService implements IAuthService {
 
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"        => $data['user_type'],
                     "mobile_number"    => $field,
                     "user_provider"    => "default"
                 ]
@@ -509,7 +496,6 @@ class AuthService implements IAuthService {
 
     function checkVerificationCode($data){
 
-        $user_type      = isset($data["user_type"])?$data["user_type"]:"user";
         $phone_code     = (isset($data["phone_code"])?$data["phone_code"]:"20");
 
 
@@ -518,7 +504,6 @@ class AuthService implements IAuthService {
             $user = $this->adapter->check_user_exist(
                 $cond = [
                     "email"     =>  $data['email'],
-                    "user_type" => $user_type,
                     "user_provider" => "default"
                 ]
             );
@@ -544,7 +529,6 @@ class AuthService implements IAuthService {
             $user = $this->adapter->check_user_exist(
                 $cond = [
                     "mobile_number"     =>  $data['mobile_number'],
-                    "user_type"         => $user_type,
                     "user_provider"     => "default"
                 ]
             );
@@ -571,12 +555,10 @@ class AuthService implements IAuthService {
     public function resetPassword($data)
     {
 
-        $user_type      = isset($data["user_type"])?$data["user_type"]:"user";
         if(isset($data['email']) && !empty($data['email']))
         {
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"             => $user_type,
                     "email"                 => $data['email'],
                     "user_provider"         => "default"
                 ]
@@ -591,7 +573,6 @@ class AuthService implements IAuthService {
 
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"                      => $user_type,
                     "mobile_number"                  => $data['mobile_number'],
                     "user_provider"                  => "default"
                 ]
@@ -612,12 +593,10 @@ class AuthService implements IAuthService {
     public function resetPasswordByEmail($data)
     {
 
-        $user_type      = isset($data["user_type"])?$data["user_type"]:"user";
         if(isset($data['email']) && !empty($data['email']))
         {
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"       => $user_type,
                     "email"           => $data['email'],
                     "user_provider"   => "default"
                 ]
@@ -632,7 +611,6 @@ class AuthService implements IAuthService {
 
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"          => $user_type,
                     "mobile_number"      => $data['mobile_number'],
                     "user_provider"      => "default"
                 ]
@@ -666,7 +644,6 @@ class AuthService implements IAuthService {
 
     function socialLogin($data)
     {
-        $data['user_type']             = isset($data["user_type"])?$data["user_type"]:"user";
         $data['password']              = bcrypt('123456');
         $data['is_active']             = 1;
         $data['is_verified']           = 1;
@@ -680,7 +657,6 @@ class AuthService implements IAuthService {
         {
             $user = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"         => $data['user_type'],
                     "social_id"         => $data['social_id'],
                     "user_provider"     => $data['user_provider']
                 ]
@@ -689,7 +665,6 @@ class AuthService implements IAuthService {
         else{
             $user           = $this->adapter->check_user_exist(
                 $cond = [
-                    "user_type"     => $data['user_type'],
                     "email"         => $data['email'],
                     "user_provider" => $data['user_provider']
                 ]
@@ -712,7 +687,6 @@ class AuthService implements IAuthService {
             $user = Auth::attempt([
                 'email'         => $user->email,
                 'password'      => '123456',
-                'user_type'     => $user->user_type,
                 'user_provider' => $user->user_provider
             ]);
 

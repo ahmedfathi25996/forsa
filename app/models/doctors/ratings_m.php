@@ -30,38 +30,44 @@ class ratings_m extends Model
             $paginate               = 0 , $return_obj       = "no"
         )
         {
-    
+
             $default_lang_id        = Config('lang_id');
-    
+
             if (!isset($default_lang_id) || !is_numeric($default_lang_id) || $default_lang_id == 0)
                 $default_lang_id    =  self::$default_lang_id;
-    
+
             $results = ratings_m::select(DB::raw("
                 ratings.*,
-                users.username
+                users.username,
+                user_img.path as user_image_path,
+                user_img.id as user_img_id
     
     
             "))->join("users", function ($join) use($default_lang_id){
                 $join->on("users.user_id","=","ratings.user_id")
                     ->whereNull("users.deleted_at");
 
-            });
-    
+            })->leftJoin("attachments as user_img", function ($join){
+                    $join->on("users.logo_id","=","user_img.id")
+                        ->whereNull("user_img.deleted_at");
+
+                });
+
             if (is_array($additional_and_wheres) && count($additional_and_wheres))
             {
                 $results        = $results->where($additional_and_wheres);
             }
-    
+
             if (!empty($free_conditions))
             {
                 $results        = $results->whereRaw($free_conditions);
             }
-    
+
             if (!empty($order_by_col))
             {
                 $results        = $results->orderBy("$order_by_col","$order_by_type");
             }
-    
+
             if ($limit > 0)
             {
                 $results        = $results->limit($limit)->offset($offset)->get();
@@ -73,15 +79,15 @@ class ratings_m extends Model
             else{
                 $results        = $results->get();
             }
-    
+
             if ($return_obj != "no")
             {
                 $results    = $results->first();
             }
-    
+
             return $results;
-    
+
         }
-    
+
 
 }

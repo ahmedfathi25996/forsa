@@ -20,7 +20,7 @@ class doctors_m extends Model
     protected $fillable   =
         [
             'user_id', 'language','price','price_for_thirty',"certificates_ids",'years_of_experience','sessions_count','rating','video_id','session_duration'
-            ,'temp_price','temp_years_of_experience','temp_video_id','temp_certificates_ids'
+            ,'temp_price','temp_years_of_experience','temp_video_id','temp_certificates_ids','is_available'
         ];
 
     public static $default_lang_id = 1;

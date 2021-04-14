@@ -9,6 +9,7 @@
 
 namespace App\Transformers;
 
+use App\models\team_member_m;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Lang;
 
@@ -71,7 +72,35 @@ class SettingTransformer extends Transformer
             $data['image'] = isset($page['small_image_path'])?url($page['small_image_path']):'';
         }
 
+        if(isset($page['page_id']) && $page['page_id'] == 1)
+        {
+            $team = team_member_m::get_team_member();
+            $data['team_members'] = [];
+            $data['team_members'] = $this->getTeamMembers($team);
+        }
+
         return $data;
+    }
+
+    private function getTeamMembers($team)
+    {
+        $pageData =[];
+        $allPages = [];
+
+        foreach ($team as $tm){
+            $pageData['name']=isset($tm->name)?$tm->name:"";
+            $pageData['title']=isset($tm->title)?$tm->title:'';
+
+            $pageData['team_member_image'] = url("public/images/no_image.png");
+            if(!empty($tm->user_image_path) && $tm->user_image_path != "T")
+            {
+                $pageData['team_member_image'] = isset($tm->user_image_path)?url($tm->user_image_path):'';
+            }
+            $allPages [] = $pageData;
+            $pageData = [];
+        }
+
+        return array_values($allPages);
     }
 
     public function transformAllPages($data)

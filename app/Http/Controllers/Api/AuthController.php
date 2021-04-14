@@ -50,8 +50,6 @@ class AuthController extends api_controller
             'username.required'        => Lang::get("auth.require_username"),
             'password.required'         => Lang::get("auth.require_password"),
             'password.min'              => Lang::get("auth.min_password"),
-            'user_type.required'        => Lang::get("auth.require_user_type"),
-            'user_type.in'              => Lang::get("auth.in_user_type"),
         ];
 
         $validator = $this->validator->getValidationErrorsWithRequest(
@@ -61,7 +59,6 @@ class AuthController extends api_controller
                 'email'          => 'required|email',
                 'password'       => 'required|confirmed|min:6',
                 'password_confirmation' => 'required',
-                "user_type"      => 'required|in:user',
                 "city"           => 'required',
                 "is_treated_before" => "required",
                 "mobile_number"   => "required|unique:users",
@@ -88,8 +85,6 @@ class AuthController extends api_controller
         $messages = [
             'field.required'     => Lang::get("auth.require_field"),
             'password.required'  => Lang::get("auth.require_password"),
-            'user_type.required' => Lang::get("auth.require_user_type"),
-            'user_type.in'       => Lang::get("auth.in_user_type"),
         ];
 
         $validator = $this->validator->getValidationErrorsWithRequest(
@@ -97,7 +92,6 @@ class AuthController extends api_controller
             [
                 'field'       => 'required',
                 'password'    => 'required',
-                "user_type"   => 'required|in:user,doctor'
             ],
             $messages );
 
@@ -115,12 +109,9 @@ class AuthController extends api_controller
             $request->all(),
             [
                 'field'         => 'required',
-                'user_type'     => 'required|in:user,doctor',
             ],
             [
                 'field.required'      => Lang::get('auth.require_field'),
-                'user_type.required'  => Lang::get("auth.require_user_type"),
-                'user_type.in'        => Lang::get("auth.in_user_type"),
             ]
         );
 
@@ -139,12 +130,9 @@ class AuthController extends api_controller
             $request->all(),
             [
                 'field'            => 'required',
-                "user_type"        => 'required|in:user,doctor'
             ],
             [
                 'field.required'     => Lang::get('auth.require_field'),
-                'user_type.required' => Lang::get("auth.require_user_type"),
-                'user_type.in'       => Lang::get("auth.in_user_type"),
 
             ]
         );
@@ -193,14 +181,11 @@ class AuthController extends api_controller
             [
                 'field'         => 'required',
                 'number_verify' => 'required|numeric',
-                'user_type'     => 'required|in:user',
             ],
             [
                 'field.required'            => Lang::get('auth.require_field'),
                 'number_verify.required'    => Lang::get('auth.require_number_verify'),
                 'number_verify.numeric'     => Lang::get('auth.numeric_number_verify'),
-                'user_type.required'        => Lang::get("auth.require_user_type"),
-                'user_type.in'              => Lang::get("auth.in_user_type"),
             ]
         );
 
@@ -221,7 +206,6 @@ class AuthController extends api_controller
             [
                 'mobile_number' => 'required|numeric|digits:9',
                 'number_verify' => 'required|numeric',
-                'user_type'     => 'required|in:user',
             ],
             [
                 'mobile_number.required'    => Lang::get('auth.require_mobile_number'),
@@ -229,8 +213,6 @@ class AuthController extends api_controller
                 'mobile_number.digits'      => Lang::get("auth.digits_mobile_number"),
                 'number_verify.required'    => Lang::get('auth.require_number_verify'),
                 'number_verify.numeric'     => Lang::get('auth.numeric_number_verify'),
-                'user_type.required'        => Lang::get("auth.require_user_type"),
-                'user_type.in'              => Lang::get("auth.in_user_type"),
             ]
         );
 
@@ -251,7 +233,6 @@ class AuthController extends api_controller
             [
                 'mobile_number' => 'required|numeric|digits:9',
                 'password'      => 'required|min:6',
-                'user_type'     => 'required|in:user',
             ],
             [
                 'mobile_number.required'    => Lang::get('auth.require_mobile_number'),
@@ -259,8 +240,6 @@ class AuthController extends api_controller
                 'mobile_number.digits'      => Lang::get("auth.digits_mobile_number"),
                 'password.required'         => Lang::get("auth.require_password"),
                 'password.min'              => Lang::get("auth.min_password"),
-                'user_type.required'        => Lang::get("auth.require_user_type"),
-                'user_type.in'              => Lang::get("auth.in_user_type"),
             ]
         );
 
@@ -279,12 +258,9 @@ class AuthController extends api_controller
         $validator = $this->validator->getValidationErrorsWithRequest(
             $request->all(),
             [
-                'user_type'     => 'required|in:user,doctor',
                 'email'         => 'required|required|email',
             ],
             [
-                'user_type.required'        => Lang::get("auth.require_user_type"),
-                'user_type.in'              => Lang::get("auth.in_user_type"),
                 'email.required'            => Lang::get("auth.email_is_required"),
                 'email.email'               => Lang::get("auth.email_is_email"),
             ]

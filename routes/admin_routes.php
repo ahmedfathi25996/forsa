@@ -41,6 +41,18 @@
     #endregion
 
 
+    #region team
+
+    Route::get('team','admin\TeamMemberController@index');
+
+    Route::get('team/save/{team_id?}','admin\TeamMemberController@save');
+    Route::post('team/save/{team_id?}','admin\TeamMemberController@save');
+
+    Route::post('team/delete','admin\TeamMemberController@delete');
+
+    #endregion
+
+
 
     #region specialites
 
