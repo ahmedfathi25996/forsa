@@ -13,6 +13,7 @@ use App\Jobs\send_push;
 use App\models\bookings\booking_m;
 use App\models\doctors\doctors_m;
 use App\models\doctors\doctors_sessions_m;
+use App\models\doctors\new_doctors_sessions;
 use App\models\doctors\ratings_m;
 use App\models\notification_m;
 use App\models\promo_code_m;
@@ -598,6 +599,7 @@ class UserService  implements IUserService
         $data = $this->adapter->upcommingSessions($user_id);
         $result = $this->transform->transformUserSessions($data);
 
+
         return $this->messageHandler->getJsonSuccessResponse("", $result);
     }
 
@@ -618,8 +620,9 @@ class UserService  implements IUserService
         $data['session_id'] = $data['doctor_session_id'];
         $data['is_paid']   = 0;
         $data['is_done'] = 0;
+        $data['session_date'] = $data['date'];
 
-        $get_session = doctors_sessions_m::where("session_id",$data['session_id'])->whereNull("deleted_at")->first();
+        $get_session = new_doctors_sessions::where("session_id",$data['session_id'])->whereNull("deleted_at")->first();
         #region check if session is exist
         if(! is_object($get_session))
         {
@@ -629,11 +632,13 @@ class UserService  implements IUserService
         #endregion
 
         #region check if session is booked
-        if($get_session->is_booked == 1)
+        $check_booking = booking_m::where("session_date",$data['date'])->where("session_id",$data['doctor_session_id'])->first();
+        if(is_object($check_booking))
         {
             return $this->messageHandler->getJsonNotFoundErrorResponse(Lang::get("user.session_booked"));
 
         }
+
         #endregion
         $doctor_id = $get_session->doctor_id;
         $doctor = doctors_m::where("doctor_id",$doctor_id)->first();
@@ -641,14 +646,7 @@ class UserService  implements IUserService
         $time_to = $get_session->time_to;
        // $minutes = abs(strtotime($time_from) - strtotime($time_to)) / 60;
 
-        $doctor_price = $doctor->price;
         $book = $this->adapter->bookSession($data);
-        $get_session->update([
-            "is_booked" => 1
-        ]);
-
-
-
 
         return $this->messageHandler->getJsonSuccessResponse("", $book);
 
@@ -724,10 +722,10 @@ class UserService  implements IUserService
         }
         $user_id = Auth::user()->user_id;
         $cond = [
-            "doctors_sessions.session_id" => $session_id,
-            "doctors_sessions.doctor_id" => $doctor_id
+            "new_doctors_sessions.session_id" => $session_id,
+            "new_doctors_sessions.doctor_id" => $doctor_id
         ];
-        $check_session = doctors_sessions_m::get_doctors_sessions($cond)->first();
+        $check_session = new_doctors_sessions::get_new_doctors_sessions($cond)->first();
         if(!is_object($check_session))
         {
             return $this->messageHandler->getJsonNotFoundErrorResponse("Error");
@@ -782,7 +780,7 @@ class UserService  implements IUserService
             $limit                  = 0 , $offset           = 0,
             $paginate               = 10 , $return_obj       = "yes"
         );
-        $get_session = doctors_sessions_m::where("session_id",$session_id)->first();
+        $get_session = new_doctors_sessions::where("session_id",$session_id)->first();
         $current_date = time();
         $session_date = strtotime($booking->session_date." ".$booking->time_from);
         if($current_date > $session_date)
@@ -841,6 +839,27 @@ class UserService  implements IUserService
             $doc->notify((new CancelSession($doc,$booking->time_from,$booking->session_date)));
         $user->notify((new CancelSession($user,$booking->time_from,$booking->session_date)));
         return $this->messageHandler->postJsonSuccessResponse(Lang::get("general.added_successfully"),[]);
+
+    }
+
+    public function joinSession($session_id)
+    {
+        $booking = booking_m::where("session_id",$session_id)->first();
+        if(!is_object($booking))
+        {
+            return $this->messageHandler->getJsonNotFoundErrorResponse("This Booking Is Not Exist");
+
+        }
+
+        if($booking->channel_name == null || $booking->session_token == null)
+        {
+            return $this->messageHandler->getJsonNotFoundErrorResponse("Your Doctor did not start the session yet");
+
+        }else{
+            return $this->messageHandler->getJsonSuccessResponse("", [
+                "url" => url("/api/session/$session_id/join?channel_name=$booking->channel_name&session_token=$booking->session_token")
+            ]);
+        }
 
     }
 

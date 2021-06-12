@@ -9,8 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Services\ISettingService;
 use App\Transformers\SettingTransformer;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
-use Lang;
 
 class SettingService   implements ISettingService {
 

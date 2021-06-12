@@ -1,26 +1,28 @@
 <?php
 
-namespace App\models;
+namespace App\models\doctors;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
-class team_member_m extends Model
+class new_doctors_sessions extends Model
 {
     use SoftDeletes;
 
-    protected $table    = "team_member";
-    protected $primaryKey   = "team_id";
+    protected $table      = "new_doctors_sessions";
 
-    protected $dates    = ["deleted_at"];
+    protected $primaryKey = "session_id";
 
-    protected $fillable =
+    protected $fillable   =
         [
-            'name','title','img_id'
+            'doctor_id', 'session_day','time_from','time_to','is_done'
         ];
 
-    static function get_team_member(
+    protected $dates      = ["deleted_at"];
+    public static $default_lang_id = 1;
+
+    static function get_new_doctors_sessions(
         $additional_and_wheres  = [], $free_conditions  = "",
         $order_by_col           = "", $order_by_type    = "",
         $limit                  = 0 , $offset           = 0,
@@ -28,16 +30,21 @@ class team_member_m extends Model
     )
     {
 
-        $results = team_member_m::select(DB::raw("
-            team_member.*,
-            user_img.path as user_image_path,
-            user_img.id as user_img_id 
-                       
-            "))->leftJoin("attachments as user_img", function ($join){
-            $join->on("team_member.img_id","=","user_img.id")
-                ->whereNull("user_img.deleted_at");
+        $default_lang_id        = Config('lang_id');
 
-        });
+        if (!isset($default_lang_id) || !is_numeric($default_lang_id) || $default_lang_id == 0)
+            $default_lang_id    =  self::$default_lang_id;
+
+        $results = new_doctors_sessions::select(DB::raw("
+            new_doctors_sessions.*
+
+
+        "))
+            ->join("doctors", function ($join) use($default_lang_id){
+                $join->on("doctors.doctor_id","=","new_doctors_sessions.doctor_id")
+                    ->whereNull("doctors.deleted_at");
+
+            });
 
         if (is_array($additional_and_wheres) && count($additional_and_wheres))
         {
@@ -66,7 +73,7 @@ class team_member_m extends Model
             $results        = $results->get();
         }
 
-        if ($return_obj!="no")
+        if ($return_obj != "no")
         {
             $results    = $results->first();
         }

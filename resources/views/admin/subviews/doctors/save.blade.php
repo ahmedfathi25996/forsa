@@ -240,7 +240,7 @@
                                 <div class="col-md-12">
                                     <div class="section-wrapper mg-t-20">
 
-                                        <label class="section-title">الصورة الشخصية</label>
+                                        <label class="section-title">الصور</label>
                                         <p class="mg-b-20 mg-sm-b-40"></p>
 
                                         <div class="row">
@@ -251,7 +251,7 @@
                                                 $filed_name             = "doctor_img_file",
                                                 $filed_label            = "doctor_img_file",
                                                 $required_field         = " accept='image/*' ",
-                                                $checkbox_field_name    = "doctor_img_checkbox",
+                                                $checkbox_field_name    = "team_img_checkbox",
                                                 $need_alt_title         = "no",
                                                 $required_alt_title     = "no",
                                                 $old_path_value         = "",
@@ -268,6 +268,7 @@
                                         </div>
 
                                     </div>
+
                                 </div>
 
 

@@ -76,7 +76,7 @@ class MessageHandleHelper  extends Controller {
         $response=$this->getErrorResponse($msg,$data);
         return response()->json($response, Response::HTTP_REQUEST_TIMEOUT);
     }
-    
+
     public function getJsonSessionExpiredErrorResponse($msg = "", $data = []) {
         $response=$this->getErrorResponse($msg,$data);
         return response()->json($response, Response::HTTP_UNAUTHORIZED);

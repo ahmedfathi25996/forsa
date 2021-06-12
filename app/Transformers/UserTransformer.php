@@ -11,8 +11,10 @@ namespace App\Transformers;
 
 use App\models\doctors\certificates\certificates_m;
 use App\models\doctors\doctors_m;
+use App\models\bookings\booking_m;
 use App\models\doctors\doctors_sessions_m;
 use App\models\doctors\doctors_specialites_m;
+use App\models\doctors\new_doctors_sessions;
 use App\models\doctors\ratings_m;
 use App\models\specialites\specialites_m;
 use App\models\specialites\specialites_translate_m;
@@ -38,6 +40,7 @@ class UserTransformer extends Transformer
         $data['token'] = isset($item['token'])?$item['token']:'';
         $data['username'] = isset($item['username'])?$item['username']:'';
         $data['email'] = isset($item['email'])?$item['email']:'';
+        $data['user_type'] = isset($item['user_type'])?$item['user_type']:'';
 
             $data['image'] = url("public/images/no_image.png");
 
@@ -71,9 +74,14 @@ class UserTransformer extends Transformer
         $data['gender']    = isset($item['gender'])?$item['gender']:"";
         if(Auth::user()->user_type == "user")
         {
+            $data['address']    = isset($item['city'])?$item['city']:"";
+
             $data['is_treated_before'] = isset($item['is_treated_before'])?$item['is_treated_before']:0;
             $data['diagnosis']    = isset($item['diagnosis'])?$item['diagnosis']:"";
             $data['forsa_tanya_knowing'] = isset($item['forsa_tanya_knowing'])?$item['forsa_tanya_knowing']:"";
+            $count = booking_m::where("user_id",$item['user_id'])->where("is_canceled",0)->count();
+            $data['sessions_count']    = $count?$count:0;
+
         }
         if(Auth::user()->user_type == 'doctor')
         {
@@ -131,16 +139,25 @@ class UserTransformer extends Transformer
 
         foreach($doctors as $item)
         {
+            $count_user_rated = ratings_m::where("doctor_id",$item->doctor_id)->count();
             $data['id']             = isset($item->doctor_id)?$item->doctor_id:0;
             $data['doctor_name']           = isset($item->full_name)?$item->full_name:"";
             $data['job_title']       = isset($item->job_title)?$item->job_title:"";
             $data['price']          = isset($item->price)?$item->price:0;
             $data['specialties']          = isset($item->specialties)?$item->specialties:"";
             $data['rating']          = isset($item->rating)?$item->rating:0;
+            $data['sessions_count']          = isset($item->sessions_count)?$item->sessions_count:0;
+            $data['user_rated_count']          = isset($count_user_rated)?$count_user_rated:0;
             $data['image']          =url("public/images/no_image.png");
             if(!empty($item->doctor_image_path) && $item->doctor_image_path != "T")
             {
                 $data['image'] = isset($item->doctor_image_path)?url($item->doctor_image_path):'';
+            }
+
+            $data['video']          =url("public/images/no_image.png");
+            if(!empty($item->doctor_video_path))
+            {
+                $data['video'] = isset($item->doctor_video_path)?url($item->doctor_video_path):'';
             }
 
             $allData[] = $data;
@@ -180,7 +197,7 @@ class UserTransformer extends Transformer
         return $allData;
     }
 
-    public function transformSingleDoctor($item,$certificates_slider,$sessions,$today_sessions,$tomorrow_sessions,$day_after_tomorrow,$ratings)
+    public function transformSingleDoctor($item,$certificates_slider,$today_sessions,$tomorrow_sessions,$day_after_tomorrow,$ratings)
     {
         $avg  = ratings_m::where("doctor_id",$item['doctor_id'])->avg("rate");
         $tomorrow_1 = date("Y-m-d", strtotime("+2 day"));
@@ -229,8 +246,6 @@ class UserTransformer extends Transformer
         $data['tomorrow_sessions'] = $this->doctorSessions($tomorrow_sessions);
         $data[$tomorrow_1]        = [];
         $data[$tomorrow_1]         = $this->doctorSessions($day_after_tomorrow);
-        $data['all_doctor_sessions'] = [];
-        $data['all_doctor_sessions'] = $this->doctorSessions($sessions);
         $data['ratings'] = [];
         $data['ratings'] = $this->doctorsRatings($ratings);
 
@@ -243,7 +258,7 @@ class UserTransformer extends Transformer
         foreach ($sessions as $cer){
             $item = [];
             $item["session_id"]     = isset($cer["session_id"])?intval($cer["session_id"]):0;
-            $item['session_date']  = isset($cer['session_date'])?$cer['session_date']:'';
+            $item['session_day']  = isset($cer['session_day'])?$cer['session_day']:'';
             $from_type = "AM";
             if($cer['time_from'] > "12:00:00" )
             {
@@ -258,6 +273,49 @@ class UserTransformer extends Transformer
             $item["time_from"]          = isset($cer["time_from"])?date('h:i',strtotime($cer["time_from"]))." ".$from_type:'';
             $item["time_to"]          = isset($cer["time_to"])?date('h:i',strtotime($cer["time_to"]))." ".$to_type:'';
             $item['is_booked']  = isset($cer['is_booked'])?$cer['is_booked']:0;
+
+            $allData[] = $item;
+        }
+
+        return array_values($allData);
+    }
+
+    public function NewDoctorsSessions($sessions,$date)
+    {
+        $allData = [];
+        foreach ($sessions as $cer){
+            $item = [];
+            $item["session_id"]     = isset($cer["session_id"])?intval($cer["session_id"]):0;
+            $item['session_day']  = isset($cer['session_day'])?$cer['session_day']:'';
+            $from_type = "AM";
+            if($cer['time_from'] > "12:00:00" )
+            {
+                $from_type = "PM";
+            }
+            $to_type = "AM";
+            if($cer['time_to'] > "12:00:00")
+            {
+                $to_type = "PM";
+
+            }
+            $item["time_from"]          = isset($cer["time_from"])?date('h:i',strtotime($cer["time_from"]))." ".$from_type:'';
+            $item["time_to"]          = isset($cer["time_to"])?date('h:i',strtotime($cer["time_to"]))." ".$to_type:'';
+            $booking = booking_m::join("new_doctors_sessions", function ($join){
+                $join->on("booking.session_id","=","new_doctors_sessions.session_id")
+                    ->whereNull("new_doctors_sessions.deleted_at");
+
+            })->where("new_doctors_sessions.doctor_id",$cer["doctor_id"])
+                ->where("new_doctors_sessions.session_day",$cer['session_day'])
+                ->where("time_from",date("H:i", strtotime($cer["time_from"])))
+                ->where("booking.session_date",$date)->first();
+            if(is_object($booking))
+            {
+                $item['is_booked']  = 1;
+
+            }else{
+                $item['is_booked']  = 0;
+
+            }
 
             $allData[] = $item;
         }
@@ -304,6 +362,10 @@ class UserTransformer extends Transformer
                 $item["doctor_price"]           = isset($session["price"])?$session["price"]:0;
                 $item["doctor_rating"]           = isset($session["rating"])?intval($session["rating"]):0;
                 $item["doctor_session_count"]           = isset($session["sessions_count"])?intval($session["sessions_count"]):0;
+                $item["doctor_id"]           = isset($session["doctor_id"])?intval($session["doctor_id"]):0;
+                $count = ratings_m::where("doctor_id",$session['doctor_id'])->count();
+                $item['user_rated_count'] = $count?$count:0;
+
 
             }
 
@@ -445,64 +507,53 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    public function transformSessionsScedule($sessions,$request)
+    public function transformSessionsScedule($sessions)
     {
-        $today = date("Y-m-d");
-        $today_1 = date("Y-m-d", strtotime("+1 day"));
-        $today_2 = date("Y-m-d", strtotime("+2 day"));
-        $today_3 = date("Y-m-d", strtotime("+3 day"));
-        $today_4 = date("Y-m-d", strtotime("+4 day"));
-        $today_5 = date("Y-m-d", strtotime("+5 day"));
-        $today_6 = date("Y-m-d", strtotime("+6 day"));
 
+        $data["Sun"] = [];
+        $data["Sun"] = $this->scheduleForSun($sessions);
 
-        $data[$today] = [];
-        $data[$today] = $this->scheduleForToday($sessions,$today);
+        $data["Mon"] = [];
+        $data["Mon"] = $this->scheduleForMon($sessions);
 
-        $data[$today_1] = [];
-        $data[$today_1] = $this->scheduleForToday_1($sessions,$today_1);
+        $data["Tue"] = [];
+        $data["Tue"] = $this->scheduleForTue($sessions);
 
-        $data[$today_2] = [];
-        $data[$today_2] = $this->scheduleForToday_2($sessions,$today_2);
+        $data["Wed"] = [];
+        $data["Wed"] = $this->scheduleForWed($sessions);
 
-        $data[$today_3] = [];
-        $data[$today_3] = $this->scheduleForToday_3($sessions,$today_3);
+        $data["Thur"] = [];
+        $data["Thur"] = $this->scheduleForThur($sessions);
 
-        $data[$today_4] = [];
-        $data[$today_4] = $this->scheduleForToday_4($sessions,$today_4);
+        $data["Fri"] = [];
+        $data["Fri"] = $this->scheduleForFri($sessions);
 
-        $data[$today_5] = [];
-        $data[$today_5] = $this->scheduleForToday_5($sessions,$today_5);
-
-        $data[$today_6] = [];
-        $data[$today_6] = $this->scheduleForToday_6($sessions,$today_6);
-
+        $data["Sat"] = [];
+        $data["Sat"] = $this->scheduleForSat($sessions);
         return $data;
 
     }
 
-    private function scheduleForToday($sessions,$today)
+    private function scheduleForSun($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Sun")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
+
 
 
             }
@@ -514,28 +565,25 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    private function scheduleForToday_1($sessions,$today_1)
+    private function scheduleForMon($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today_1;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Mon")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
 
 
             }
@@ -547,28 +595,25 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    private function scheduleForToday_2($sessions,$today_2)
+    private function scheduleForTue($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today_2;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Tue")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
 
 
             }
@@ -580,28 +625,25 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    private function scheduleForToday_3($sessions,$today_3)
+    private function scheduleForWed($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today_3;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Wed")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
 
 
             }
@@ -613,28 +655,25 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    private function scheduleForToday_4($sessions,$today_4)
+    private function scheduleForThur($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today_4;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Thur")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
 
 
             }
@@ -646,28 +685,25 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    private function scheduleForToday_5($sessions,$today_5)
+    private function scheduleForFri($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today_5;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Fri")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
 
 
             }
@@ -679,28 +715,25 @@ class UserTransformer extends Transformer
         return array_values($allData);
     }
 
-    private function scheduleForToday_6($sessions,$today_6)
+    private function scheduleForSat($sessions)
     {
 
         $user = Auth::user();
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
-        $date = $today_6;
 
         foreach ($sessions as $key=>$value){
 
             $item = [];
-            $check = doctors_sessions_m::where("session_date",$date)->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
+            $check = new_doctors_sessions::where("session_day","Sat")->where("doctor_id",$doctor->doctor_id)->where("time_from",$value."00")->first();
             if ($check)
             {
                 $item["time"]          = $value;
                 $item['is_selected']   = 1;
-                $item['is_booked']     = $check->is_booked;
 
 
             }else{
                 $item["time"]          = $value;
                 $item['is_selected']   = 0;
-                $item['is_booked']     = 0;
 
 
             }
@@ -711,6 +744,7 @@ class UserTransformer extends Transformer
 
         return array_values($allData);
     }
+
 
     public function transformHomeBookedSessions($sessions)
     {

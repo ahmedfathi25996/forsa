@@ -12,6 +12,7 @@ use App\models\doctors\certificates\certificates_m;
 use App\models\doctors\doctors_m;
 use App\models\doctors\ratings_m;
 use App\models\doctors\doctors_sessions_m;
+use App\models\doctors\new_doctors_sessions;
 use App\models\notification_m;
 use App\models\settings_m;
 use App\models\wallet_history_m;
@@ -21,10 +22,12 @@ use App\Notifications\mail\WalletNotification;
 use App\Services\IDoctorService;
 use App\Transformers\UserTransformer;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Http\Request;
 
 
 class DoctorService implements IDoctorService {
@@ -66,24 +69,30 @@ class DoctorService implements IDoctorService {
             $limit = $request['limit'];
         }
         $now = date('Y-m-d');
-        $tomorrow = date('Y-m-d', strtotime(' +1 day'));
+        $timestamp = strtotime($now);
+        $today = date('D', $timestamp);
 
-        $day_after_tomorrow = date('Y-m-d', strtotime(' +2 day'));
+        $tomorrow_timestamp = date("Y-m-d", strtotime("+1 day"));
+        $tomorrow_timestamp = strtotime($tomorrow_timestamp);
+        $tomorrow = date('D', $tomorrow_timestamp);
 
+        $day_after_tomorrow_timestamp = date("Y-m-d", strtotime("+2 day"));
+        $day_after_tomorrow_timestamp = strtotime($day_after_tomorrow_timestamp);
+        $day_after_tomorrow = date('D', $day_after_tomorrow_timestamp);
+
+        $cond[] = ["doctors.doctor_id","=",$doctor_id];
 
         $cond2 = [];
-        $cond[] = ["doctors.doctor_id","=",$doctor_id];
-        $cond2[] = ["doctors_sessions.doctor_id","=",$doctor_id];
-        $cond2[] = ["doctors_sessions.is_done","=",0];
-        $cond2[] = ["doctors_sessions.is_verified_by_admin","=",1];
+        $cond2[] = ["new_doctors_sessions.doctor_id","=",$doctor_id];
+        $cond2[] = ["new_doctors_sessions.is_done","=",0];
 
-        $cond3[] = ["doctors_sessions.session_date","=",$now];
+        $cond3[] = ["new_doctors_sessions.session_day","=",$today];
         $cond3 = array_merge($cond2,$cond3);
-        $cond4[] = ["doctors_sessions.session_date","=",$tomorrow];
+        $cond4[] = ["new_doctors_sessions.session_day","=",$tomorrow];
         $cond4 = array_merge($cond2,$cond4);
         $cond5 = [];
         $cond5[] = ["ratings.doctor_id","=",$doctor_id];
-        $cond6[] = ["doctors_sessions.session_date","=",$day_after_tomorrow];
+        $cond6[] = ["new_doctors_sessions.session_day","=",$day_after_tomorrow];
         $cond6 = array_merge($cond2,$cond6);
 
 
@@ -91,16 +100,134 @@ class DoctorService implements IDoctorService {
         $data = $this->adapter->listAllDoctors($cond,$limit);
         $data = $data[0];
         $certificates_slider  =  $this->adapter->getCertificateSlider($data);
-        $all_sessions = doctors_sessions_m::get_doctors_sessions($cond2);
-        $today_sessions = doctors_sessions_m::get_doctors_sessions($cond3);
-        $tomorrow_sessions = doctors_sessions_m::get_doctors_sessions($cond4);
-        $day_after_tomorrow = doctors_sessions_m::get_doctors_sessions($cond6);
+
+        $today_sessions = new_doctors_sessions::get_new_doctors_sessions($cond3);
+
+        $tomorrow_sessions = new_doctors_sessions::get_new_doctors_sessions($cond4);
+
+        $day_after_tomorrow = new_doctors_sessions::get_new_doctors_sessions($cond6);
+
         $ratings = ratings_m::get_doctors_ratings($cond5);
 
-        $result = $this->transform->transformSingleDoctor($data,$certificates_slider,$all_sessions,$today_sessions,$tomorrow_sessions,$day_after_tomorrow,$ratings);
+        $result = $this->transform->transformSingleDoctor($data,$certificates_slider,$today_sessions,$tomorrow_sessions,$day_after_tomorrow,$ratings);
 
 
         return $this->messageHandler->getJsonSuccessResponse("", $result);
+    }
+
+    public function getDoctorScheduleByDate($request,$doctor_id)
+    {
+        $cond2 = [];
+        $cond2[] = ["new_doctors_sessions.doctor_id","=",$doctor_id];
+        $cond2[] = ["new_doctors_sessions.is_done","=",0];
+        $date = $request->date;
+        $timestamp = strtotime($date);
+        $day = date('D', $timestamp);
+
+        $cond3[] = ["new_doctors_sessions.session_day","=",$day];
+        $cond3 = array_merge($cond2,$cond3);
+
+        $sessions = new_doctors_sessions::get_new_doctors_sessions($cond3);
+        $result = $this->transform->NewDoctorsSessions($sessions,$date);
+
+        return $this->messageHandler->getJsonSuccessResponse("", $result);
+
+
+    }
+
+    public function add_new_sessions($data,$user)
+    {
+        $now = Carbon::now();
+        #region check if session is exist
+        $get_doctor = doctors_m::where("user_id",$user->user_id)->first();
+        $duration = $get_doctor->session_duration * 60;
+        #endregion
+        $now_date = date('Y-m-d');
+
+
+
+
+        $get_session = new_doctors_sessions::where("doctor_id",$get_doctor->doctor_id)->first();
+
+        foreach($data as $key => $value)
+        {
+            foreach($data[$key] as $sch)
+            {
+                $data['session_day'] = $key;
+                $data['is_done'] = 0;
+                $data['doctor_id'] = $get_doctor->doctor_id;
+                $data["time_from"]       = date("H:i", strtotime($sch["time_from"]));
+                $time_from = strtotime($sch['time_from']);
+                $minutes = $time_from + $duration ;
+                $endDate = date('H:i', $minutes);
+                $data["time_to"]         = $endDate;
+
+                $check =  new_doctors_sessions::where("session_day",$key)->where("time_from",date("H:i", strtotime($sch["time_from"])))->first();
+
+                if($check)
+                {
+                    new_doctors_sessions::where("session_id",$check->session_id)->update([
+                        "doctor_id" => $get_doctor->doctor_id,
+                        "session_day" => $key,
+                        "is_done" => 0,
+                        "time_from" => date("H:i", strtotime($sch["time_from"])),
+                        "time_to" => $endDate
+                    ]);
+                    if($sch['is_selected'] == 0)
+                    {
+                        $booking = booking_m::join("new_doctors_sessions", function ($join){
+                            $join->on("booking.session_id","=","new_doctors_sessions.session_id")
+                                ->whereNull("new_doctors_sessions.deleted_at");
+
+                        })->where("new_doctors_sessions.doctor_id",$get_doctor->doctor_id)
+                            ->where("new_doctors_sessions.session_day",$key)
+                            ->where("time_from",date("H:i", strtotime($sch["time_from"])))
+                            ->where("booking.session_date",">=",$now_date)->first();
+                        if(is_object($booking))
+                        {
+                            return $this->messageHandler->getJsonNotFoundErrorResponse("You Can not Delete this session in ".$key." ".date("H:i", strtotime($sch["time_from"]))." because it is booked");
+
+                        }
+                        new_doctors_sessions::where("session_day",$key)->where("time_from",date("H:i", strtotime($sch["time_from"])))->forceDelete();
+                    }
+
+                }
+
+
+
+                else{
+                    if($sch['is_selected'] == 1){
+                        $this->adapter->createSession($data);
+
+                    }
+
+                }
+
+            }
+        }
+
+        $duration = $get_doctor->session_duration;
+        $a = '09:00';
+        $b = '24:00';
+        $time_duration = "PT".$duration."M";
+        $array = array();
+
+        $period = new \DatePeriod(
+            new \DateTime($a),
+            new \DateInterval($time_duration),
+            new \DateTime($b)
+        );
+
+
+        foreach ($period as $date) {
+            $array[] =  $date->format("H:i");
+        }
+
+
+        $schedule = $this->transform->transformSessionsScedule($array);
+
+        return $this->messageHandler->getJsonSuccessResponse(Lang::get("general.session_added"),$schedule);
+
     }
 
     public function addNewSession($data,$user)
@@ -381,7 +508,7 @@ class DoctorService implements IDoctorService {
         }
 
 
-        $schedule = $this->transform->transformSessionsScedule($array,$request);
+        $schedule = $this->transform->transformSessionsScedule($array);
         return $this->messageHandler->getJsonSuccessResponse("", $schedule);
 
 
@@ -435,8 +562,9 @@ class DoctorService implements IDoctorService {
         $current_time = time();
 
         $user = Auth::user();
-        $get_session = doctors_sessions_m::where("session_id",$session_id)->first();
-        $session_date = $get_session->session_date;
+        $get_session = new_doctors_sessions::where("session_id",$session_id)->first();
+        $book = booking_m::where("session_id",$session_id)->first();
+        $session_date = $book->session_date;
         $time_from = $get_session->time_from;
         $session_end_time = $session_date." ".$get_session->time_to;
         $date_time = new \DateTime($session_end_time);
@@ -458,7 +586,7 @@ class DoctorService implements IDoctorService {
         #endregion
 
         #check if doctor start session more than 5 minutes early
-        $session_start_time = $session_date."".$time_from;
+        $session_start_time = $session_date." ".$time_from;
 
         $date_time = new \DateTime($session_start_time);
         $session_start_time = $date_time->getTimestamp();
@@ -468,15 +596,15 @@ class DoctorService implements IDoctorService {
         $minutes = ($diff->days * 24 * 60) +
             ($diff->h * 60) + $diff->i;
 
-        if($diff->format("%r%a") != "0")
-        {
+
+
             if( $minutes > 5)
             {
                 return $this->messageHandler->getJsonNotFoundErrorResponse("You cannot start the session earlier than 5 minutes");
 
             }
 
-        }
+
 
 
         #endregion
@@ -485,7 +613,7 @@ class DoctorService implements IDoctorService {
         #region generate token and channel name
         $appid = "0e03caa49a7c4594b60ad8178b1d9880";
         $channel_name  = md5("#!@!#!*&*(&" . "sponsor_btm" . "#!@!#!*&*(&" . time() . random_bytes(5));
-        $session_date = $get_session->session_date;
+        $session_date = $book->session_date;
         $time_to = $get_session->time_to;
         $time = strtotime($session_date." ".$time_to);
         $token = RtcTokenBuilder::buildTokenWithUid($appid,'5df0bc7ecb1e4f0686f9c3f154148167',$channel_name,null,1,$time);
@@ -528,7 +656,7 @@ class DoctorService implements IDoctorService {
 
     public function afterSessionActions($request,$session_id)
     {
-        $session = doctors_sessions_m::where("session_id",$session_id)->first();
+        $session = new_doctors_sessions::where("session_id",$session_id)->first();
         $booking = booking_m::where("session_id",$session_id)->first();
         $get_user = User::where("user_id",$booking->user_id)->first();
 
@@ -537,13 +665,6 @@ class DoctorService implements IDoctorService {
             return;
         }
 
-        if($booking->is_done == 1)
-        {
-            return;
-        }
-        $session->update([
-           "is_done" => 1
-        ]);
 
         $booking->update([
            "is_done" => 1
@@ -589,9 +710,8 @@ class DoctorService implements IDoctorService {
         $doctor = doctors_m::where("user_id",$user->user_id)->first();
         $cond = [];
         $cond[] = ["doctors.doctor_id","=",$doctor->doctor_id];
-        $cond[] = ['doctors_sessions.is_booked',"=",1];
         $cond[] = ["booking.is_paid", "=" , 1];
-        $cond[] = ['doctors_sessions.session_date',"=",$date];
+        $cond[] = ['booking.session_date',"=",$date];
         $bookings = booking_m::get_user_bookings($cond);
         if(is_array($bookings->all()) && count($bookings->all()) > 0)
         {

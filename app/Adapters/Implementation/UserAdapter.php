@@ -187,17 +187,16 @@ class UserAdapter implements IUserAdapter {
        $time =  date("H:i:s");
         $now = date('Y-m-d');
         $cond       = [];
-        $cond[]     = ["doctors_sessions.session_date",">=", $now];
+        $cond[]     = ["booking.session_date",">=", $now];
         $cond[]     = ["booking.is_paid", "=" , 1];
-        $cond[]     = ["doctors_sessions.is_done", "=" , 0];
-        $cond[]     = ["doctors_sessions.is_booked", "=" , 1];
+        $cond[]     = ["new_doctors_sessions.is_done", "=" , 0];
         if(Auth::user()->user_type == "user")
         {
             $cond[]     = ["booking.user_id", "=" , $user_id];
 
         }else{
             $get_user = doctors_m::where("user_id",Auth::user()->user_id)->first();
-            $cond[]     = ["doctors_sessions.doctor_id", "=" , $get_user->doctor_id];
+            $cond[]     = ["new_doctors_sessions.doctor_id", "=" , $get_user->doctor_id];
 
         }
 
@@ -214,19 +213,18 @@ class UserAdapter implements IUserAdapter {
     function previousSessions($user_id)
     {
         $now = date('Y-m-d');
-        $time =  date("H:i:s");
+
         $cond       = [];
         $cond       = [];
-        $cond[]     = ["doctors_sessions.session_date","<=", $now];
+        $cond[]     = ["booking.session_date","<", $now];
         $cond[]     = ["booking.is_paid", "=" , 1];
-        $cond[]     = ["doctors_sessions.is_booked", "=" , 1];
         if(Auth::user()->user_type == "user")
         {
             $cond[]     = ["booking.user_id", "=" , $user_id];
 
         }else{
             $get_user = doctors_m::where("user_id",Auth::user()->user_id)->first();
-            $cond[]     = ["doctors_sessions.doctor_id", "=" , $get_user->doctor_id];
+            $cond[]     = ["new_doctors_sessions.doctor_id", "=" , $get_user->doctor_id];
 
         }
         return booking_m::get_user_bookings(

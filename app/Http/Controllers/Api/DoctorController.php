@@ -42,6 +42,26 @@ class DoctorController extends api_controller
         return $this->service->getSingleDoctor($request,$doctor_id);
     }
 
+    public function add_new_sessions(Request $request)
+    {
+        $data = $request->all();
+        $user = Auth::user();
+        $messages = [];
+
+        $validator = $this->validator->getValidationErrorsWithRequest(
+            $request->all(),
+            [
+
+            ],
+            $messages
+        );
+        if ($validator !== true)
+            return $this->getJsonValidationErrorResponse("", $validator);
+
+
+        return $this->service->add_new_sessions($data, $user);
+    }
+
     public function addNewSession(Request $request)
     {
         $data = $request->all();
@@ -61,6 +81,24 @@ class DoctorController extends api_controller
 
 
         return $this->service->addNewSession($data, $user);
+    }
+
+    public function getDoctorScheduleByDate(Request $request,$doctor_id)
+    {
+        $messages = [];
+
+        $validator = $this->validator->getValidationErrorsWithRequest(
+            $request->all(),
+            [
+                'date'      => 'required',
+            ],
+            $messages
+        );
+        if ($validator !== true)
+            return $this->getJsonValidationErrorResponse("", $validator);
+
+        return $this->service->getDoctorScheduleByDate($request, $doctor_id);
+
     }
 
     public function editSession(Request $request,$session_id)
@@ -127,6 +165,24 @@ class DoctorController extends api_controller
 
     public function updateDoctorBio(Request $request)
     {
+        $messages = [
+
+        ];
+
+        $validator = $this->validator->getValidationErrorsWithRequest(
+            $request->all(),
+            [
+                'video'      => 'max:12000'
+
+
+            ],
+            $messages
+        );
+
+
+        if ($validator !== true)
+            return $this->getJsonValidationErrorResponse("", $validator);
+
         $user = Auth::user();
 
         return $this->service->updateDoctorBio($request, $user);

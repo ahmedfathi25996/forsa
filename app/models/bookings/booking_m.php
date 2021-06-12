@@ -20,7 +20,7 @@ class booking_m extends Model
     protected $fillable   =
         [
             'user_id', 'session_id','is_paid','is_done','price_after_discount','rate',
-            'channel_name','session_token','doctor_join','user_join','is_canceled'
+            'channel_name','session_token','doctor_join','user_join','is_canceled','session_date'
         ];
 
     public static $default_lang_id = 1;
@@ -51,11 +51,10 @@ class booking_m extends Model
             users.username,
             users.age,
             users.user_id as patient_user_id,
-            doctors_sessions.session_date,
-            doctors_sessions.session_id,
-            doctors_sessions.time_from,
-            doctors_sessions.time_to,
-            doctors_sessions.is_done,
+            new_doctors_sessions.session_id,
+            new_doctors_sessions.time_from,
+            new_doctors_sessions.time_to,
+            new_doctors_sessions.is_done,
             user_img.path as user_image_path,
             user_img.id as user_img_id
 
@@ -65,13 +64,13 @@ class booking_m extends Model
                     $join->on("users.user_id","=","booking.user_id")
                         ->whereNull("users.deleted_at");
 
-                }) ->join("doctors_sessions", function ($join) use($default_lang_id){
-                    $join->on("doctors_sessions.session_id","=","booking.session_id")
-                        ->whereNull("doctors_sessions.deleted_at");
+                }) ->join("new_doctors_sessions", function ($join) use($default_lang_id){
+                    $join->on("new_doctors_sessions.session_id","=","booking.session_id")
+                        ->whereNull("new_doctors_sessions.deleted_at");
 
                 })->join("doctors", function ($join) use($default_lang_id){
-                    $join->on("doctors.doctor_id","=","doctors_sessions.doctor_id")
-                        ->whereNull("doctors_sessions.deleted_at");
+                    $join->on("doctors.doctor_id","=","new_doctors_sessions.doctor_id")
+                        ->whereNull("doctors.deleted_at");
 
                 })
                 ->join("doctors_translate as doc_trans", function ($join) use($default_lang_id){
@@ -124,27 +123,27 @@ class booking_m extends Model
             booking.*,
             doc_trans.full_name,
             doc_trans.job_title,
+            doctors.doctor_id,
             doctors.price,
             doctors.rating,
             doctors.sessions_count,
             users.username,
             users.age,
-            doctors_sessions.session_date,
-            doctors_sessions.time_from,
-            doctors_sessions.time_to,
-            doctors_sessions.is_done,
+            new_doctors_sessions.time_from,
+            new_doctors_sessions.time_to,
+            new_doctors_sessions.is_done,
             user_img.path as user_image_path,
             user_img.id as user_img_id
 
 
         "))
-                ->join("doctors_sessions", function ($join) use($default_lang_id){
-                    $join->on("doctors_sessions.session_id","=","booking.session_id")
-                        ->whereNull("doctors_sessions.deleted_at");
+                ->join("new_doctors_sessions", function ($join) use($default_lang_id){
+                    $join->on("new_doctors_sessions.session_id","=","booking.session_id")
+                        ->whereNull("new_doctors_sessions.deleted_at");
 
                 })->join("doctors", function ($join) use($default_lang_id){
-                    $join->on("doctors.doctor_id","=","doctors_sessions.doctor_id")
-                        ->whereNull("doctors_sessions.deleted_at");
+                    $join->on("doctors.doctor_id","=","new_doctors_sessions.doctor_id")
+                        ->whereNull("doctors.deleted_at");
 
                 }) ->join("users", function ($join) use($default_lang_id){
                     $join->on("users.user_id","=","doctors.user_id")
@@ -220,23 +219,22 @@ class booking_m extends Model
             doctors.sessions_count,
             users.username,
             users.age,
-            doctors_sessions.session_date,
-            doctors_sessions.time_from,
-            doctors_sessions.time_to,
-            doctors_sessions.is_done,
-            doctors_sessions.doctor_id,
+            new_doctors_sessions.time_from,
+            new_doctors_sessions.time_to,
+            new_doctors_sessions.is_done,
+            new_doctors_sessions.doctor_id,
             user_img.path as user_image_path,
             user_img.id as user_img_id
 
 
         "))
-            ->join("doctors_sessions", function ($join) use($default_lang_id){
-                $join->on("doctors_sessions.session_id","=","booking.session_id")
-                    ->whereNull("doctors_sessions.deleted_at");
+            ->join("new_doctors_sessions", function ($join) use($default_lang_id){
+                $join->on("new_doctors_sessions.session_id","=","booking.session_id")
+                    ->whereNull("new_doctors_sessions.deleted_at");
 
             })->join("doctors", function ($join) use($default_lang_id){
-                $join->on("doctors.doctor_id","=","doctors_sessions.doctor_id")
-                    ->whereNull("doctors_sessions.deleted_at");
+                $join->on("doctors.doctor_id","=","new_doctors_sessions.doctor_id")
+                    ->whereNull("new_doctors_sessions.deleted_at");
 
             }) ->join("users", function ($join) use($default_lang_id){
                 $join->on("users.user_id","=","doctors.user_id")

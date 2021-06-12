@@ -30,7 +30,7 @@
                         <div class="card-body">
                             <div class="media">
                                 <img src="{{get_image_or_default($item_data->logo_path)}}" alt="">
-                               
+
                             </div><!-- media -->
                         </div><!-- card-body -->
                         <div class="media-body">
@@ -108,7 +108,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($item->is_done == 0)
+                                                @if( $current_date < $item->session_date )
                                                 <a class="btn btn-primary mg-b-6" href="{{url("admin/users/bookings/$item->doctor_id/sessions/$item->session_id")}}">
                                                     تغيير الميعاد
                                                 </a>
@@ -143,7 +143,7 @@
                 </div><!-- col-8 -->
 
                 <div class="col-lg-4 mg-t-20 mg-lg-t-0">
-                
+
                     <div class="card pd-25 mg-t-20">
                         <div class="slim-card-title">البيانات الشخصية</div>
 

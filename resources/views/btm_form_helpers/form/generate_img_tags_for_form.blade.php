@@ -49,9 +49,7 @@ $alt_field_name             = $filed_label . "alt";
     <div class="">
         <div class="">
             <div class="row-fluid">
-                <?php if(   strpos($old_path_value, "pdf") > 0 ||
-                            strpos($old_path_value, "doc") > 0 ||
-                            strpos($old_path_value, "docx") > 0 ||
+                <?php if(
                             strpos($old_path_value, "mp4") > 0
                         ):?>
                     <a class="btn btn-info" href="{{$old_path_value}}" >اللينك</a>

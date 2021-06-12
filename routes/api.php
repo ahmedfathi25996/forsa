@@ -44,6 +44,7 @@ Route::group([ 'middleware' => ['auth:api','APILocalization']], function () {
 
     #region doctor sessions
     Route::post("/add/session",'Api\DoctorController@addNewSession');
+    Route::post("/add/new/session",'Api\DoctorController@add_new_sessions');
     Route::put("/edit/session/{session_id}",'Api\DoctorController@editSession');
 
     #endregion
@@ -76,6 +77,8 @@ Route::group([ 'middleware' => ['auth:api','APILocalization']], function () {
     Route::get("notifications",'Api\UserController@getNofifications');
     Route::get("list/schedule",'Api\DoctorController@listSchedule');
     Route::get("start/session/{session_id}",'Api\DoctorController@startSession');
+    Route::get("join/session/{session_id}",'Api\UserController@joinSession');
+
 
 
 
@@ -142,6 +145,7 @@ Route::group([ 'middleware' => ['APILocalization','shouldUseApi']], function () 
     #region doctors
     Route::get("doctors",'Api\DoctorController@listAllDoctors');
     Route::get('doctors/{doctor_id}','Api\DoctorController@getSingleDoctor');
+    Route::get('doctors/{doctor_id}/schedule/bydate','Api\DoctorController@getDoctorScheduleByDate');
 
     #endregion
 

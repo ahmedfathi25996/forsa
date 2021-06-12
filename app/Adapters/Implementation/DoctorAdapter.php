@@ -8,6 +8,7 @@ use App\models\doctors\certificates\certificates_m;
 use App\models\doctors\doctors_m;
 use App\models\doctors\doctors_sessions_m;
 use App\models\doctors\doctors_translate_m;
+use App\models\doctors\new_doctors_sessions;
 use App\User;
 use Carbon\Carbon;
 
@@ -43,7 +44,7 @@ class DoctorAdapter implements IDoctorAdapter
 
    public function createSession($data)
    {
-       return doctors_sessions_m::create($data);
+       return new_doctors_sessions::create($data);
    }
 
    public function updateSession($data,$session_id)
@@ -78,6 +79,7 @@ class DoctorAdapter implements IDoctorAdapter
 
     public function updateDoctorBio($data,$doctor_id)
     {
+        /*
         $doctor =  doctors_m::where('doctor_id',$doctor_id)->first();
         return $doctor->update([
             "temp_price" => $data['price'],
@@ -85,6 +87,17 @@ class DoctorAdapter implements IDoctorAdapter
             "temp_video_id" => $data['video_id'],
             "temp_certificates_ids" => $data['certificates_ids']
         ]);
+
+        */
+
+        $doctor =  doctors_m::where('doctor_id',$doctor_id)->first();
+        return $doctor->update([
+            "price" => $data['price'],
+            "years_of_experience" => $data['years_of_experience'],
+            "video_id" => $data['video_id'],
+            "certificates_ids" => $data['certificates_ids']
+        ]);
+
 
     }
 

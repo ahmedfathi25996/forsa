@@ -6,6 +6,7 @@ use App\Http\Controllers\adminBaseController;
 use App\models\bookings\booking_m;
 use App\models\doctors\doctors_m;
 use App\models\doctors\doctors_sessions_m;
+use App\models\doctors\new_doctors_sessions;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -75,8 +76,8 @@ class usersController extends adminBaseController
 
         $cond2       = [];
         $cond2[]     = ["booking.user_id","=",$user_id];
-        $cond2[]     = ["doctors_sessions.is_booked","=",1];
         $cond2[]     = ["booking.is_paid","=",1];
+        $this->data['current_date'] = date('Y-m-d');
 
 
         $item_data2= booking_m::get_users_bookings_dashboard(
@@ -94,7 +95,6 @@ class usersController extends adminBaseController
         $user_id   = intval(($user_id));
         $cond       = [];
         $cond[]     = ["booking.user_id","=",$user_id];
-        $cond[]     = ["doctors_sessions.is_booked","=",1];
 
         $item_data2= booking_m::get_users_bookings_dashboard(
             $additional_and_wheres  = $cond, $free_conditions  = "",
@@ -113,14 +113,13 @@ class usersController extends adminBaseController
     {
         $this->data['doctor_id'] = $doctor_id;
         $this->data['session_id'] = $session_id;
-        $cond[] = ["doctors_sessions.doctor_id","=",$doctor_id];
-        $cond[] = ["doctors_sessions.is_booked","=",0];
+        $cond[] = ["new_doctors_sessions.doctor_id","=",$doctor_id];
 
-        $this->data["results"] = doctors_sessions_m::get_doctors_sessions(
-            $additional_and_wheres  = $cond,
-            $free_conditions        = "",
-            $order_by_col           = "",
-            $order_by_type          = "asc"
+        $this->data["results"] = new_doctors_sessions::get_new_doctors_sessions(
+            $additional_and_wheres  = $cond, $free_conditions        = "",
+            $order_by_col           = "", $order_by_type          = "asc",
+            $limit                  = 0 , $offset           = 0,
+            $paginate               = 10 , $return_obj       = "no"
         );
 
         return view("admin.subviews.users.bookings.sessions", $this->data);
@@ -136,13 +135,6 @@ class usersController extends adminBaseController
            "session_id" => $request->session_id
         ]);
 
-        $new_booking->update([
-            "is_booked" => 1
-        ]);
-
-        $get_session->update([
-           "is_booked" => 0
-        ]);
         return Redirect::to('/admin/clients');
 
     }

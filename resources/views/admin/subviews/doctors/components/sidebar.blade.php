@@ -4,6 +4,11 @@
         <span class="badge badge-success"></span>
     </a>
 
+    <a href="{{url("admin/doctors/$doctor_id/booking")}}" class="nav-link">
+        <span>الحجوزات </span>
+        <span class="badge badge-success"></span>
+    </a>
+
     <a href="{{url("admin/wallet/doctors/$doctor_id")}}" class="nav-link">
         <span>المحفظة </span>
         <span class="badge badge-success"></span>

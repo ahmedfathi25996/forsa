@@ -3,7 +3,11 @@
 @section('additional_css')
 
     <link href="{{url("/")}}/public/admin/lib/datatables/css/jquery.dataTables.css" rel="stylesheet">
-    <link href="{{url("/")}}/public/admin/lib/jquery-ui/css/jquery-ui.css" rel="stylesheet">
+    <link href="{{url("/")}}/public/admin/lib/select2/css/select2.min.css" rel="stylesheet">
+    <link href="{{url("/")}}/public/admin/lib/bootstrap-datetimepicker2/bootstrap-datetimepicker.css" rel="stylesheet">
+    <link href="{{url("/")}}/public/admin/lib/jt.timepicker/css/jquery.timepicker.css" rel="stylesheet">
+
+
 
 @endsection
 
@@ -11,20 +15,31 @@
 
     <script src="{{url("/")}}/public/admin/lib/datatables/js/jquery.dataTables.js"></script>
     <script src="{{url("/")}}/public/admin/lib/datatables-responsive/js/dataTables.responsive.js"></script>
+    <script src="{{url("/")}}/public/admin/lib/select2/js/select2.min.js"></script>
+    <script src="{{url("/")}}/public/admin/lib/bootstrap-datetimepicker2/bootstrap-datetimepicker.min.js"></script>
+    <script src="{{url("/")}}/public/admin/lib/parsleyjs/js/parsley.js"></script>
+    <script src="{{url("/")}}/public/admin/lib/jt.timepicker/js/jquery.timepicker.js"></script>
+    <script src="{{url("/")}}/public/admin/lib/moment/js/moment.js"></script>
     <script src="{{url("/")}}/public/admin/lib/jquery-ui/js/jquery-ui.js"></script>
 
 @endsection
 
 @section('subview')
 
+    <?php
+
+    $required_sign          = ' <span style="color: red;font-weight: bold;">*</span>';
+
+    ?>
+
     <div class="slim-mainpanel">
         <div class="container">
             <div class="slim-pageheader">
                 <ol class="breadcrumb slim-breadcrumb">
                     <li class="breadcrumb-item"><a href="{{url("admin/dashboard")}}">الرئيسية</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">الجلسات</li>
+                    <li class="breadcrumb-item"><a href="{{url("admin/doctors/$doctor_id/sessions")}}">الجلسات</a></li>
                 </ol>
-                <h6 class="slim-pagetitle">الجلسات</h6>
+                <h6 class="slim-pagetitle"> الجلسات</h6>
             </div><!-- slim-pageheader -->
 
             <div class="section-wrapper">
@@ -33,65 +48,53 @@
 
                 <div class="table-wrapper">
 
-                    <?php if(is_array($results->all()) && count($results->all())): ?>
+                    <form id="save_form" action="{{url("admin/doctors/$doctor_id/sessions/save/$session_id")}}" method="POST" enctype="multipart/form-data">
 
-                    <table id="datatable2" class="table display responsive nowrap">
-                        <thead>
-                        <tr>
-                            <th class="wd-15p"><span>#</span></th>
-                            <th class="wd-15p"><span>تاريخ الجلسة</span></th>
-                            <th class="wd-15p"><span>الوقت من</span></th>
-                            <th class="wd-15p"><span>الوقت إلى</span></th>
-                            <th class="wd-15p"><span>محجوزة؟</span></th>
-                            <th class="wd-15p"><span>العملية</span></th>
-                        </tr>
-                        </thead>
-                        <tbody id="sortable">
-                        <?php foreach ($results as $key => $item): ?>
-                        <tr id="row{{$item->session_id}}" data-fieldname="social_order"
-                            data-itemid="<?= $item->session_id ?>" data-tablename="App\models\doctors\doctors_sessions_m">
-                            <td>
-                                {{$key+1}}
-                            </td>
-                            <td>
-                                {{$item->session_date}}
-                            </td>
+                        <div class="row">
+                            <div class="col-md-12">
 
-                            <td>
-                                {{$item->time_from}}
-                            </td>
+                                <div class="section-wrapper mg-t-20">
 
-                            <td>
-                                {{$item->time_to}}
-                            </td>
-                            <td>
-                                @if($item->is_booked)
-                                    <span>الجلسة محجوزة</span>
-                                @else
-                                    <span>غير محجوزة</span>
-                                @endif
-                            </td>
-                            <td>
-                                <form action="{{url("admin/users/bookings/$session_id")}}" method="POST" enctype="multipart/form-data">
-                                    {{csrf_field()}}
-                                    <input type="hidden" name="session_id" value="{{$item->session_id}}">
-                                    <input class="btn btn-primary" type="submit" value="تغيير بهذا الميعاد">
-                                </form>
+                                    <label class="section-title">البيانات الأساسية</label>
+                                    <p class="mg-b-20 mg-sm-b-40"></p>
+
+                                    <div class="row">
+
+                                        <?php
+                                        echo
+                                        generate_select_tags(
+                                            $field_name         = "session_id",
+                                            $label_name         = "إختار الوقت ؟".$required_sign,
+                                            $text               =  $results->pluck("time_from")->all(),
+                                            $values             = $results->pluck("session_id")->all(),
+                                            $selected_value     = "",
+                                            $class              = "form-control select_2_primary",
+                                            $multiple           = "",
+                                            $required           = "",
+                                            $disabled           = "",
+                                            $data               = "" ,
+                                            $grid               = "col-md-12"
+                                        );
 
 
 
+                                        ?>
 
-                            </td>
-                        </tr>
-                        <?php endforeach ?>
-                        </tbody>
-                    </table>
+                                    </div>
 
-                    <?php else : ?>
+                                </div>
 
-                    @include('admin.components.no_results_found')
+                            </div>
 
-                    <?php endif; ?>
+                        </div>
+
+                        {{csrf_field()}}
+
+                        <div class="form-layout-footer">
+                            <input id="submit" type="submit" value="حفظ" class="btn btn-primary bd-0">
+                        </div>
+
+                    </form>
 
                 </div><!-- table-wrapper -->
             </div><!-- section-wrapper -->
@@ -100,3 +103,6 @@
     </div><!-- slim-mainpanel -->
 
 @endsection
+
+
+

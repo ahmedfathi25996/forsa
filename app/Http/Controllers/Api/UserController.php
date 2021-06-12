@@ -371,6 +371,11 @@ class UserController extends api_controller
         return $this->service->cancelBooking($session_id);
     }
 
+    public function joinSession($session_id)
+    {
+        return $this->service->joinSession($session_id);
+    }
+
     #endregion
 
 

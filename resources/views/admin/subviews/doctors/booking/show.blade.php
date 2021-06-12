@@ -22,9 +22,9 @@
             <div class="slim-pageheader">
                 <ol class="breadcrumb slim-breadcrumb">
                     <li class="breadcrumb-item"><a href="{{url("admin/dashboard")}}">الرئيسية</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">الجلسات</li>
+                    <li class="breadcrumb-item active" aria-current="page">الحجوزات</li>
                 </ol>
-                <h6 class="slim-pagetitle">الجلسات</h6>
+                <h6 class="slim-pagetitle">الحجوزات</h6>
             </div><!-- slim-pageheader -->
 
             <div class="section-wrapper">
@@ -39,21 +39,21 @@
                         <thead>
                         <tr>
                             <th class="wd-15p"><span>#</span></th>
-                            <th class="wd-15p"><span> يوم الجلسة</span></th>
+                            <th class="wd-15p"><span> تاريخ الجلسة</span></th>
                             <th class="wd-15p"><span>الوقت من</span></th>
                             <th class="wd-15p"><span>الوقت إلى</span></th>
-                            <th class="wd-15p"><span>العملية</span></th>
+                            <th class="wd-15p"><span>حالة الدفع</span></th>
                         </tr>
                         </thead>
                         <tbody id="sortable">
                         <?php foreach ($results as $key => $item): ?>
-                        <tr id="row{{$item->session_id}}" data-fieldname="social_order"
-                            data-itemid="<?= $item->session_id ?>" data-tablename="App\models\doctors\new_doctors_sessions_m">
+                        <tr id="row{{$item->book_id}}" data-fieldname="social_order"
+                            data-itemid="<?= $item->book_id ?>" data-tablename="App\models\doctors\new_doctors_sessions">
                             <td>
                                 {{$key+1}}
                             </td>
                             <td>
-                                {{$item->session_day}}
+                                {{$item->session_date}}
                             </td>
 
                             <td>
@@ -63,20 +63,20 @@
                             <td>
                                 {{$item->time_to}}
                             </td>
-
                             <td>
-
-                                <a class="btn btn-primary mg-b-6" href="{{url("admin/doctors/$doctor_id/sessions/save/$item->session_id")}}">
-                                    <i class="fa fa-edit"></i>
-                                </a>
-
-
+                                @if($item->is_paid == 0)
+                                    <span>لم يتم الدفع</span>
+                                @else
+                                    <span>تم الدفع</span>
+                                @endif
                             </td>
+
+
                         </tr>
                         <?php endforeach ?>
                         </tbody>
                     </table>
-                        {{$results->links()}}
+                    {{$results->links()}}
 
                     <?php else : ?>
 

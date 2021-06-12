@@ -536,7 +536,7 @@ class DoctorController extends adminBaseController
         $cond       = [];
         $cond[]     = ["doctors.doctor_id","=",$doctor_id];
         $this->data['doctor_id'] = $doctor_id;
-        $this->data['results'] = doctors_m::get_doctors($additional_and_wheres = $cond);
+        $this->data['results'] = doctors_m::get_dashboard_doctors($additional_and_wheres = $cond);
         return view("admin.subviews.doctors.bio_changes", $this->data);
 
     }

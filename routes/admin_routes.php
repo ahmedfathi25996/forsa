@@ -98,6 +98,11 @@
     Route::post('doctor/approve/{doctor_id}','admin\users\DoctorController@approveData');
     Route::post('doctor/bio/approve/{doctor_id}','admin\users\DoctorController@approveDoctorBio');
 
+    Route::get('doctors/{doctor_id}/booking','admin\DoctorBookingController@index');
+    Route::get('doctors/{doctor_id}/booking/save/{book_id?}','admin\DoctorBookingController@saveDoctorBookimg');
+    Route::post('doctors/{doctor_id}/booking/save/{book_id?}','admin\DoctorBookingController@saveDoctorBookimg');
+    Route::post('doctors/{doctor_id}/booking/delete','admin\DoctorBookingController@deleteDoctorBooking');
+
     //doctors specialites
     Route::get('doctors/{doctor_id}/spec','admin\users\DoctorController@getDoctorsSpecialites');
     Route::get('doctors/{doctor_id}/spec/save/{spe_id?}','admin\users\DoctorController@saveDoctorSpecialites');

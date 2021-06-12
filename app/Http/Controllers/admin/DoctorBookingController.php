@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
-class SessionController extends adminBaseController
+class DoctorBookingController extends adminBaseController
 {
 
     public function __construct()
@@ -22,7 +22,7 @@ class SessionController extends adminBaseController
 
         $this->middleware(function ($request, $next) {
 
-            $this->setMetaTitle("الجلسات");
+            $this->setMetaTitle("الحجوزات");
 
             return $next($request);
         });
@@ -31,18 +31,19 @@ class SessionController extends adminBaseController
 
     public function index($doctor_id)
     {
-         $this->data['doctor_id'] = $doctor_id;
-         $cond[] = ["new_doctors_sessions.doctor_id","=",$doctor_id];
-        $this->data["results"] = new_doctors_sessions::get_new_doctors_sessions(
+        $this->data['doctor_id'] = $doctor_id;
+        $cond[] = ["new_doctors_sessions.doctor_id","=",$doctor_id];
+
+        $this->data["results"] = booking_m::get_users_bookings_dashboard(
             $additional_and_wheres  = $cond, $free_conditions        = "",
             $order_by_col           = "", $order_by_type          = "asc",
             $limit                  = 0 , $offset           = 0,
             $paginate               = 10 , $return_obj       = "no"
         );
 
-        return view("admin.subviews.doctors.sessions.show", $this->data);
+        return view("admin.subviews.doctors.booking.show", $this->data);
     }
-
+/*
     public function save(Request $request,$doctor_id, $session_id = null)
     {
 
@@ -196,5 +197,5 @@ class SessionController extends adminBaseController
         $this->general_remove_item($request,'App\models\doctors\new_doctors_sessions_m');
     }
 
-
+*/
 }

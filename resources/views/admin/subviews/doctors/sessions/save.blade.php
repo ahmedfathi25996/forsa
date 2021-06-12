@@ -66,10 +66,23 @@
                                     <div class="row">
 
                                         <?php
+                                        echo generate_select_tags(
+                                            $field_name         = "session_day",
+                                            $label_name         = "يوم الجلسة",
+                                            $text               = ["الأحد", "الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],
+                                            $values             = ["Sun", "Mon","Tue","Wed","Thur","Fri","Sat"],
+                                            $selected_value     = "",
+                                            $class              = "form-control",
+                                            $multiple           = "",
+                                            $required           = "",
+                                            $disabled           = "",
+                                            $data               = $item_data ,
+                                            $grid               = "col-md-12"
+                                        );
+
 
                                         $normal_tags =
                                             [
-                                                "session_date",
                                                 "time_from",
                                                 "time_to"
 
@@ -83,8 +96,6 @@
                                             $grid_default_value = 6
                                         );
 
-                                        $attrs[0]["session_date"]          = ' تاريخ الجلسة '. $required_sign;
-                                        $attrs[3]["session_date"]            = "date";
                                         $attrs[0]["time_from"]          = ' الوقت من '. $required_sign;
                                         $attrs[0]["time_to"]            = ' الوقت إلي '. $required_sign;
 
