@@ -1,7 +1,7 @@
 <?php
 
 
-    Route::get('dashboard','admin\dashboardController@index');
+    Route::get('dashboard2','admin\dashboardController@index');
 
 
     #region langs
